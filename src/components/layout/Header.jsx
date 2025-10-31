@@ -1,0 +1,56 @@
+import { useNavigate } from "react-router-dom";
+import useAuthStore from "../../store/authStore";
+
+const Header = () => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuthStore();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  const handleLogIn = () => {
+    navigate("/login");
+  };
+
+  return (
+    <>
+      <div className="w-full h-9 bg-black fixed top-0 z-50"></div>
+      <header className="fixed top-9 w-full z-40 bg-white h-17 flex items-center justify-between px-40">
+        {/* 좌측: 로고 */}
+        <div className="flex gap-4">
+          <div className="font-bold text-lg">ModeOn</div>
+          {/* 중앙: 메뉴 */}
+          <nav className="flex gap-15 ml-70">
+            <div>Home</div>
+            <div>MAN</div>
+            <div>WOMAN</div>
+            <div>KIDS</div>
+          </nav>
+        </div>
+
+        {/* 우측: 아이콘 / 로그인 */}
+        <div className="flex gap-4">
+          <div>SEARCH BARRRRRRR</div>
+          <div>LIKE</div>
+          <div>CART</div>
+          {user ? (
+            <div onClick={handleLogout} className="cursor-pointer">
+              LOGOUT
+            </div>
+          ) : (
+            <div onClick={handleLogIn} className="cursor-pointer">
+              Login
+            </div>
+          )}
+        </div>
+
+        {/* 헤더 밑 구분선 */}
+        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gray-300"></div>
+      </header>
+    </>
+  );
+};
+
+export default Header;
