@@ -7,11 +7,15 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/auth");
   };
 
   const handleLogIn = () => {
-    navigate("/login");
+    if (window.location.pathname === "/auth") {
+      window.location.reload();
+    } else {
+      navigate("/auth");
+    }
   };
 
   return (
@@ -33,12 +37,14 @@ const Header = () => {
         {/* 우측: 아이콘 / 로그인 */}
         <div className="flex gap-4">
           <div>SEARCH BARRRRRRR</div>
-          <div>LIKE</div>
-          <div>CART</div>
           {user ? (
-            <div onClick={handleLogout} className="cursor-pointer">
-              LOGOUT
-            </div>
+            <>
+              <div>LIKE</div>
+              <div>CART</div>
+              <div onClick={handleLogout} className="cursor-pointer">
+                LOGOUT
+              </div>
+            </>
           ) : (
             <div onClick={handleLogIn} className="cursor-pointer">
               Login
@@ -47,7 +53,7 @@ const Header = () => {
         </div>
 
         {/* 헤더 밑 구분선 */}
-        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gray-300"></div>
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-300"></div>
       </header>
     </>
   );
