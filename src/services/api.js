@@ -26,7 +26,7 @@ api.interceptors.response.use(
   (err) => {
     if (err.response?.status === 401) {
       StorageService.clear();
-      window.location.href = "/login";
+      window.location.href = "/auth";
     }
     return Promise.reject(err);
   }
