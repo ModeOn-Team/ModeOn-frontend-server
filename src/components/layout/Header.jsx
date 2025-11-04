@@ -25,6 +25,7 @@ const Header = () => {
         {/* 좌측: 로고 */}
         <div className="flex gap-4">
           <div className="font-bold text-lg">ModeOn</div>
+
           {/* 중앙: 메뉴 */}
           <nav className="flex gap-15 ml-70">
             <div>Home</div>
@@ -39,6 +40,14 @@ const Header = () => {
           <div>SEARCH BARRRRRRR</div>
           {user ? (
             <>
+              {user.role === "ROLE_ADMIN" && (
+                <div
+                  onClick={() => navigate(import.meta.env.VITE_ADMIN_PAGE_URL)}
+                  className="cursor-pointer"
+                >
+                  Admin Page
+                </div>
+              )}
               <div>LIKE</div>
               <div>CART</div>
               <div onClick={handleLogout} className="cursor-pointer">

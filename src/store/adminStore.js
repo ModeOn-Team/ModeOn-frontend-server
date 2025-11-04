@@ -1,0 +1,159 @@
+import { create } from "zustand";
+import { AdminService } from "../services/admin";
+
+const useAdminStore = create((set) => ({
+  products: [],
+  categories: [],
+  loading: false,
+  error: null,
+
+  // product
+  ProductCreate: async (ProductFormData) => {
+    set({ loading: true, error: null });
+    try {
+      const data = await AdminService.ProductCreate(ProductFormData);
+      set({
+        loading: false,
+      });
+      return data;
+    } catch (err) {
+      set({
+        loading: false,
+        error: err.response?.data?.message || "ProductCreate failed",
+      });
+      throw err;
+    }
+  },
+
+  ProductImage: async (ProductFormData) => {
+    set({ loading: true, error: null });
+    try {
+      const uploadedProduct = await AdminService.ProductImage(ProductFormData);
+      set((state) => ({
+        products: [uploadedProduct, ...state.products],
+        loading: false,
+      }));
+      set({
+        loading: false,
+      });
+      return uploadedProduct;
+    } catch (err) {
+      set({
+        loading: false,
+        error: err.response?.data?.message || "ProductCreate failed",
+      });
+      throw err;
+    }
+  },
+
+  fetchProducts: async (page = 0) => {
+    set({ loading: true, error: null });
+    try {
+      const content = await AdminService.getAllProducts(page);
+
+      set({
+        products: content,
+        loading: false,
+      });
+    } catch (err) {
+      set({
+        error: err.response?.data.message || "Failed to fetch products",
+        loading: false,
+      });
+      throw err;
+    }
+  },
+
+  // productVariant
+  ProductVariantCreate: async (ProductVariantFormData) => {
+    set({ loading: true, error: null });
+    try {
+      const data = await AdminService.ProductVariantCreate(
+        ProductVariantFormData
+      );
+      set({
+        loading: false,
+      });
+      return data;
+    } catch (err) {
+      set({
+        loading: false,
+        error: err.response?.data?.message || "ProductVariantCreate failed",
+      });
+      throw err;
+    }
+  },
+
+  ProductVariantUpdate: async (ProductVariantFormData) => {
+    set({ loading: true, error: null });
+    try {
+      const data = await AdminService.ProductVariantUpdate(
+        ProductVariantFormData
+      );
+      set({
+        loading: false,
+      });
+      return data;
+    } catch (err) {
+      set({
+        loading: false,
+        error: err.response?.data?.message || "ProductVariantUpdate failed",
+      });
+      throw err;
+    }
+  },
+
+  ProductDelete: async (ProductId) => {
+    set({ loading: true, error: null });
+    try {
+      const data = await AdminService.ProductDelete(ProductId);
+      set({
+        loading: false,
+      });
+      return data;
+    } catch (err) {
+      set({
+        loading: false,
+        error: err.response?.data?.message || "ProductDelete failed",
+      });
+      throw err;
+    }
+  },
+
+  // category
+  fetchCategories: async () => {
+    set({ loading: true, error: null });
+    try {
+      const content = await AdminService.getAllCategories();
+      set({
+        categories: content,
+        loading: false,
+      });
+    } catch (err) {
+      set({
+        error: err.response?.data.message || "Failed to fetch categories",
+        loading: false,
+      });
+      throw err;
+    }
+  },
+
+  CreateCategory: async (parentId, name) => {
+    set({ loading: true, error: null });
+    try {
+      const newCategory = await AdminService.CreateCategory(parentId, name);
+      set((state) => ({
+        categories: [newCategory, ...state.categories],
+        loading: false,
+      }));
+    } catch (err) {
+      set({
+        error: err.response?.data.message || "Failed to create categories",
+        loading: false,
+      });
+      throw err;
+    }
+  },
+}));
+
+export default useAdminStore;
