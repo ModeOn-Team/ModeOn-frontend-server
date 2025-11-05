@@ -3,20 +3,16 @@ import { useEffect } from "react";
 import useAdminStore from "../../store/adminStore";
 import ProductList from "./ProductList";
 import ProductSearch from "./ProductSearch";
+import useProductStore from "../../store/ProductStore";
 
 const Product = () => {
-  const {
-    products,
-    fetchProducts,
-    categories,
-    fetchCategories,
-    ProductDelete,
-  } = useAdminStore();
-  
+  const { ProductDelete } = useAdminStore();
+  const { categories, products, fetchCategories, fetchProducts } = useProductStore();
+
   useEffect(() => {
     fetchProducts();
     fetchCategories();
-  }, [fetchProducts]);
+  }, []);
 
   return (
     <div>

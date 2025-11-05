@@ -4,6 +4,8 @@ import Home from "./pages/home.jsx";
 import AuthPage from "./pages/authPage.jsx";
 import useAuthStore from "./store/authStore.js";
 import AdminPage from "./pages/adminPage.jsx";
+import ProductPage from "./pages/ProductPage.jsx";
+import ProductDetailPage from "./pages/ProductDetailPage.jsx"
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
@@ -22,9 +24,15 @@ export default function App() {
         />
         <Route
           path={import.meta.env.VITE_ADMIN_PAGE_URL}
-          element={isAuthenticated ? <AdminPage /> : <Navigate to="/" replace /> }
+          element={
+            isAuthenticated ? <AdminPage /> : <Navigate to="/" replace />
+          }
         />
-        
+        <Route
+          path="/product"
+          element={isAuthenticated ? <ProductPage /> :  <Navigate to="/" replace /> }
+        />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
       </Routes>
     </BrowserRouter>
   );

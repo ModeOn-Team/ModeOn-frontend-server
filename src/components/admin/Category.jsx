@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import useAdminStore from "../../store/adminStore";
 import CategoryMasterDetail from "./CategoryMasterDetail";
 import CategoryForm from "./CategoryForm";
+import useProductStore from "../../store/ProductStore";
 
 const Category = () => {
-  const { categories, fetchCategories, CreateCategory } = useAdminStore();
+  const { CreateCategory } = useAdminStore();
+  const { categories, fetchCategories } = useProductStore();
   const [modalInfo, setModalInfo] = useState({
     open: false,
     depth: null,

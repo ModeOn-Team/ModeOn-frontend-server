@@ -46,24 +46,6 @@ const useAdminStore = create((set) => ({
     }
   },
 
-  fetchProducts: async (page = 0) => {
-    set({ loading: true, error: null });
-    try {
-      const content = await AdminService.getAllProducts(page);
-
-      set({
-        products: content,
-        loading: false,
-      });
-    } catch (err) {
-      set({
-        error: err.response?.data.message || "Failed to fetch products",
-        loading: false,
-      });
-      throw err;
-    }
-  },
-
   // productVariant
   ProductVariantCreate: async (ProductVariantFormData) => {
     set({ loading: true, error: null });
@@ -121,23 +103,6 @@ const useAdminStore = create((set) => ({
   },
 
   // category
-  fetchCategories: async () => {
-    set({ loading: true, error: null });
-    try {
-      const content = await AdminService.getAllCategories();
-      set({
-        categories: content,
-        loading: false,
-      });
-    } catch (err) {
-      set({
-        error: err.response?.data.message || "Failed to fetch categories",
-        loading: false,
-      });
-      throw err;
-    }
-  },
-
   CreateCategory: async (parentId, name) => {
     set({ loading: true, error: null });
     try {

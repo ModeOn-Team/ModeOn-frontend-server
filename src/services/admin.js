@@ -25,13 +25,6 @@ export const AdminService = {
     return response.data;
   },
 
-  getAllProducts: async (page = 0, size = 10) => {
-    const response = await api.get(ADMIN_API_URL + "/product", {
-      params: { page, size },
-    });
-    return response.data.content;
-  },
-
   async ProductDelete(ProductId) {
     await api.delete(ADMIN_API_URL + `/product/${ProductId}`);
   },
@@ -54,11 +47,6 @@ export const AdminService = {
   },
 
   // category
-  getAllCategories: async () => {
-    const response = await api.get(ADMIN_API_URL + "/categories");
-    return response.data;
-  },
-
   CreateCategory: async (parentId, name) => {
     const response = await api.post(ADMIN_API_URL + "/categories", {
       parentId,
