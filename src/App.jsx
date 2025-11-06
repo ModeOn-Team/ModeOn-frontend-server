@@ -5,7 +5,10 @@ import AuthPage from "./pages/authPage.jsx";
 import useAuthStore from "./store/authStore.js";
 import AdminPage from "./pages/adminPage.jsx";
 import ProductPage from "./pages/ProductPage.jsx";
-import ProductDetailPage from "./pages/ProductDetailPage.jsx"
+import ProductDetailPage from "./pages/ProductDetailPage.jsx";
+import CartPage from "./pages/CartPage";
+import Success from "./pages/Success";
+import Fail from "./pages/Fail";
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
@@ -30,9 +33,16 @@ export default function App() {
         />
         <Route
           path="/product"
-          element={isAuthenticated ? <ProductPage /> :  <Navigate to="/" replace /> }
+          element={
+            isAuthenticated ? <ProductPage /> : <Navigate to="/" replace />
+          }
         />
         <Route path="/product/:id" element={<ProductDetailPage />} />
+
+        {/* 결제 관련 */}
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/success" element={<Success />} />
+        <Route path="/fail" element={<Fail />} />
       </Routes>
     </BrowserRouter>
   );
