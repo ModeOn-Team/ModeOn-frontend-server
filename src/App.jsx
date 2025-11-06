@@ -6,6 +6,12 @@ import ChatListPage from "./pages/ChatListPage.jsx";
 import ChatRoomPage from "./pages/ChatRoomPage.jsx";
 import AdminChatListPage from "./pages/AdminChatListPage.jsx";
 import useAuthStore from "./store/authStore.js";
+import AdminPage from "./pages/adminPage.jsx";
+import ProductPage from "./pages/ProductPage.jsx";
+import ProductDetailPage from "./pages/ProductDetailPage.jsx";
+import CartPage from "./pages/CartPage";
+import Success from "./pages/Success";
+import Fail from "./pages/Fail";
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
@@ -15,9 +21,7 @@ export default function App() {
       <Routes>
         <Route
           path="/"
-          element={
-            isAuthenticated ? <Home /> : <Navigate to="/auth" replace />
-          }
+          element={isAuthenticated ? <Home /> : <Navigate to="/auth" replace />}
         />
         <Route path="/oauth2/callback" element={<OAuth2Callback />} />
         <Route
@@ -39,9 +43,31 @@ export default function App() {
         <Route
           path="/chat/admin"
           element={
-            isAuthenticated ? <AdminChatListPage /> : <Navigate to="/auth" replace />
+            isAuthenticated ? (
+              <AdminChatListPage />
+            ) : (
+              <Navigate to="/auth" replace />
+            )
           }
         />
+        <Route
+          path={import.meta.env.VITE_ADMIN_PAGE_URL}
+          element={
+            isAuthenticated ? <AdminPage /> : <Navigate to="/" replace />
+          }
+        />
+        <Route
+          path="/product"
+          element={
+            isAuthenticated ? <ProductPage /> : <Navigate to="/" replace />
+          }
+        />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
+
+        {/* 결제 관련 */}
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/success" element={<Success />} />
+        <Route path="/fail" element={<Fail />} />
       </Routes>
     </BrowserRouter>
   );
