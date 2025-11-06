@@ -3,6 +3,9 @@ import OAuth2Callback from "./pages/OAuth2Callback.jsx";
 import Home from "./pages/home.jsx";
 import AuthPage from "./pages/authPage.jsx";
 import useAuthStore from "./store/authStore.js";
+import AdminPage from "./pages/adminPage.jsx";
+import ProductPage from "./pages/ProductPage.jsx";
+import ProductDetailPage from "./pages/ProductDetailPage.jsx"
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
@@ -12,15 +15,24 @@ export default function App() {
       <Routes>
         <Route
           path="/"
-          element={
-            isAuthenticated ? <Home /> : <Navigate to="/auth" replace />
-          }
+          element={isAuthenticated ? <Home /> : <Navigate to="/auth" replace />}
         />
         <Route path="/oauth2/callback" element={<OAuth2Callback />} />
         <Route
           path="/auth"
           element={isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />}
         />
+        <Route
+          path={import.meta.env.VITE_ADMIN_PAGE_URL}
+          element={
+            isAuthenticated ? <AdminPage /> : <Navigate to="/" replace />
+          }
+        />
+        <Route
+          path="/product"
+          element={isAuthenticated ? <ProductPage /> :  <Navigate to="/" replace /> }
+        />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
       </Routes>
     </BrowserRouter>
   );
