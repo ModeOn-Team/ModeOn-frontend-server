@@ -5,20 +5,15 @@ import ChatMessageList from "../components/chat/ChatMessageList";
 import ChatInput from "../components/chat/ChatInput";
 import useChatSocket from "../hooks/useChatSocket";
 import useChatStore from "../store/chatStore";
-import useAuthStore from "../store/authStore";
 import { getChatMessages } from "../services/chatApi";
-import StorageService from "../services/storage";
 
 // 1:1 채팅 상세 페이지
 // 실시간 메시지 송수신 및 WebSocket 연결 관리
 const ChatRoomPage = () => {
   const { roomId } = useParams();
-  const { user } = useAuthStore();
   const {
     setCurrentRoomId,
-    currentRoomId,
     isConnected,
-    messages,
     loading,
     setMessages,
     setLoading,
@@ -27,7 +22,7 @@ const ChatRoomPage = () => {
   // roomId가 유효한 숫자인지 확인 (WebSocket 연결용)
   const roomIdNumber = roomId ? Number(roomId) : null;
   const validRoomId = roomIdNumber && !isNaN(roomIdNumber) ? String(roomIdNumber) : null;
-  const { sendMessage, sendTypingStatus } = useChatSocket(validRoomId);
+  const { sendTypingStatus } = useChatSocket(validRoomId);
   const [initialLoad, setInitialLoad] = useState(false);
 
   // 초기 메시지 로드
@@ -140,8 +135,6 @@ const ChatRoomPage = () => {
     );
   }
 
-  const validRoomIdForInput = validRoomId;
-
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <ChatHeader roomId={roomId} otherUser={otherUser} />
@@ -150,7 +143,7 @@ const ChatRoomPage = () => {
         <ChatMessageList roomId={roomId} />
       </div>
 
-      <ChatInput roomId={validRoomIdForInput} sendTypingStatus={sendTypingStatus} />
+      <ChatInput roomId={validRoomId} sendTypingStatus={sendTypingStatus} />
     </div>
   );
 };
