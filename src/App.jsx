@@ -12,6 +12,7 @@ import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import CartPage from "./pages/CartPage";
 import Success from "./pages/Success";
 import Fail from "./pages/Fail";
+import Mypage from "./pages/myPage"
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
@@ -60,6 +61,12 @@ export default function App() {
           path="/product"
           element={
             isAuthenticated ? <ProductPage /> : <Navigate to="/" replace />
+          }
+        />
+        <Route
+          path="/mypage"
+          element={
+            isAuthenticated ? <Mypage /> : <Navigate to="/" replace />
           }
         />
         <Route path="/product/:id" element={<ProductDetailPage />} />

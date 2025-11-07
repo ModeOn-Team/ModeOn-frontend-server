@@ -14,6 +14,10 @@ const Header = () => {
     navigate(url);
   };
 
+  const handleMypage = () => {
+    navigate("/mypage");
+  };
+
   const handleLogIn = () => {
     if (window.location.pathname === "/auth") {
       window.location.reload();
@@ -28,16 +32,39 @@ const Header = () => {
       <header className="fixed top-9 w-full z-40 bg-white h-17 flex items-center justify-between px-40">
         {/* 좌측: 로고 */}
         <div className="flex gap-4">
-          <div onClick={() => handleChangePage("/")} className="font-bold text-lg cursor-pointer">
+          <div
+            onClick={() => handleChangePage("/")}
+            className="font-bold text-lg cursor-pointer"
+          >
             ModeOn
           </div>
 
           {/* 중앙: 메뉴 */}
           <nav className="flex gap-15 ml-70">
-            <div onClick={() => handleChangePage("/Product?gender=null")} className="cursor-pointer">ALL</div>
-            <div onClick={() => handleChangePage("/Product?gender=MAN")} className="cursor-pointer">MAN</div>
-            <div onClick={() => handleChangePage("/Product?gender=WOMAN")} className="cursor-pointer">WOMAN</div>
-            <div onClick={() => handleChangePage("/Product?gender=KIDS")} className="cursor-pointer">KIDS</div>
+            <div
+              onClick={() => handleChangePage("/Product?gender=null")}
+              className="cursor-pointer"
+            >
+              ALL
+            </div>
+            <div
+              onClick={() => handleChangePage("/Product?gender=MAN")}
+              className="cursor-pointer"
+            >
+              MAN
+            </div>
+            <div
+              onClick={() => handleChangePage("/Product?gender=WOMAN")}
+              className="cursor-pointer"
+            >
+              WOMAN
+            </div>
+            <div
+              onClick={() => handleChangePage("/Product?gender=KIDS")}
+              className="cursor-pointer"
+            >
+              KIDS
+            </div>
           </nav>
         </div>
 
@@ -54,8 +81,9 @@ const Header = () => {
                   Admin Page
                 </div>
               )}
-              <div>LIKE</div>
-              <div>CART</div>
+              <div onClick={handleMypage} className="cursor-pointer">
+                MyPage
+              </div>
               <div onClick={handleLogout} className="cursor-pointer">
                 LOGOUT
               </div>
