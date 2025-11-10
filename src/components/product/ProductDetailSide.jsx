@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { cartService } from "../../services/cartService";
+
 
 const ProductDetailSide = ({
   name,
@@ -48,6 +50,23 @@ const ProductDetailSide = ({
       prev.filter((selectedOption) => selectedOption.id !== id)
     );
   };
+
+  const handleAddToCart = async () => {
+    if (selectedOptions.length === 0) {
+      alert("옵션을 선택해주세요.");
+      return;
+    }
+    try {
+      for (const option of selectedOptions) {
+        await cartService.addItem(option.id, option.quantity);
+      }
+      alert("장바구니에 담겼습니다!");
+    } catch (err) {
+      console.error(err);
+      alert("장바구니 담기 실패!");
+    }
+  };
+  
 
   return (
     <>
@@ -124,17 +143,23 @@ const ProductDetailSide = ({
         </div>
       )}
 
-      <div className="flex flex-row gap-4 mt-3">
-        <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
-          찜
-        </button>
-        <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
-          장바구니
-        </button>
-        <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
-          구매하기
-        </button>
-      </div>
+<div className="flex flex-row gap-4 mt-3">
+  <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
+    찜
+  </button>
+
+  <button
+    onClick={handleAddToCart}
+    className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition"
+  >
+    장바구니
+  </button>
+
+  <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
+    구매하기
+  </button>
+</div>
+
 
       <div className="text-sm mt-3">
         <p className="font-medium">🚚 ModeOn 회원은 전 품목 무료 배송</p>
@@ -145,7 +170,12 @@ const ProductDetailSide = ({
 
       <p className="font-semibold mb-2 mt-4">이 상품을 활용한 사진 후기</p>
       <div className="text-gray-400 text-sm">아직 등록된 후기가 없습니다.</div>
+      
+
+      
     </>
+
+    
   );
 };
 

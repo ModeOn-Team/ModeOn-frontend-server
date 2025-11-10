@@ -12,6 +12,8 @@ import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import CartPage from "./pages/CartPage";
 import Success from "./pages/Success";
 import Fail from "./pages/Fail";
+import HistoryPage from "./pages/HistoryPage";
+
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
@@ -68,6 +70,13 @@ export default function App() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/success" element={<Success />} />
         <Route path="/fail" element={<Fail />} />
+
+
+       {/* 주문 내역 */}
+       <Route
+       path="/orders"
+       element = {isAuthenticated ? <HistoryPage /> : <Navigate to="/auth" replace />}
+/>
       </Routes>
     </BrowserRouter>
   );
