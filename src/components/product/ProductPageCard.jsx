@@ -5,7 +5,7 @@ import { wishListService } from "../../services/wishList";
 const ProductPageCard = ({ product }) => {
   const navigate = useNavigate();
 
-  console.log(product);
+  console.log("product",product);
   const [isWish, setIsWish] = useState(product.wishList);
   const [wishCount, setWishCount] = useState(product.wishListCount || 0);
 
@@ -46,7 +46,6 @@ const ProductPageCard = ({ product }) => {
               {product.price?.toLocaleString()} 원
             </h4>
 
-            {/* ✅ 상태 기반으로 아이콘 표시 */}
             <div className="flex items-center">
               <span
                 onClick={(e) => toggleWishList(e, product.id)}
@@ -65,7 +64,7 @@ const ProductPageCard = ({ product }) => {
         <div className="text-sm text-gray-500 font-medium">
           {product.gender} - {product.category?.name || "Uncategorized"}
           <div className="text-sm text-gray-500 font-light">
-            <p>찜: {wishCount} 후기: 0</p>
+            <p>찜: {wishCount} 후기: {product.commentCount}</p>
           </div>
         </div>
       </div>

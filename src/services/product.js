@@ -14,8 +14,8 @@ export const ProductService = {
   },
 
   getProductById: async (productId) => {
-    const res =await api.get(`/api/product/detail/${productId}`);
-    return res.data;
+    const response = await api.get(`/api/product/detail/${productId}`);
+    return response.data;
   },
 
   async ProductSearch(ProductSearchForm) {
@@ -26,7 +26,7 @@ export const ProductService = {
       color,
       word,
       page,
-      size: pageSize,
+      pageSize,
     } = ProductSearchForm;
 
     console.log(gender);
@@ -37,7 +37,7 @@ export const ProductService = {
     if (color) query.append("color", color);
     if (word) query.append("word", word);
     if (page !== undefined) query.append("page", page);
-    if (pageSize !== undefined) query.append("size", pageSize);
+    if (pageSize !== undefined) query.append("pageSize", pageSize);
 
     const response = await api.get(`/api/product/search?${query.toString()}`);
     return response.data;

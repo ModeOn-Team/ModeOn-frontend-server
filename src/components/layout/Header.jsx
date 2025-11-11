@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/authStore";
+import SearchBar from "../ui/SearchBar";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -69,8 +70,10 @@ const Header = () => {
         </div>
 
         {/* 우측: 아이콘 / 로그인 */}
-        <div className="flex gap-4">
-          <div>SEARCH BARRRRRRR</div>
+        <div className="flex gap-4 items-center">
+          <div className="mr-20">
+            <SearchBar />
+          </div>
           {user ? (
             <>
               {user.role === "ROLE_ADMIN" && (

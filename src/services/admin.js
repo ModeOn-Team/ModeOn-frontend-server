@@ -30,17 +30,17 @@ export const AdminService = {
   },
 
   // productVariant
-  async ProductVariantCreate(ProductVariantFormData) {
+  async ProductVariantCreate(productId, ProductVariantFormData) {
     const response = await api.post(
-      ADMIN_API_URL + `/products/${ProductVariantFormData.productId}/variants`,
+      ADMIN_API_URL + `/products/${productId}/variants`,
       ProductVariantFormData
     );
     return response.data;
   },
 
-  async ProductVariantUpdate(ProductVariantFormData) {
+  async ProductVariantUpdate(ProductVariantId, ProductVariantFormData) {
     const response = await api.put(
-      ADMIN_API_URL + `/products/variants/${ProductVariantFormData.id}`,
+      ADMIN_API_URL + `/products/variants/${ProductVariantId}`,
       ProductVariantFormData
     );
     return response.data;
