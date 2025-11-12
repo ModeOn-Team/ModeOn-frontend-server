@@ -1,6 +1,6 @@
 import StockTable from "./StockTable";
 
-const StockList = ({ products, ProductVariantUpdate, onRefresh }) => {
+const StockList = ({ products, ProductVariantUpdate, onRefresh, lastElementRef }) => {
   if (!products || products.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
@@ -25,9 +25,18 @@ const StockList = ({ products, ProductVariantUpdate, onRefresh }) => {
           </tr>
         </thead>
         <tbody>
-          {products.map((product) => (
-            <StockTable key={product.id} product={product} ProductVariantUpdate={ProductVariantUpdate} onRefresh={onRefresh}/>
-          ))}
+          {products.map((product, idx) => {
+            const isLast = idx === products.length - 1;
+            return (
+              <StockTable
+                key={product.id}
+                product={product}
+                ProductVariantUpdate={ProductVariantUpdate}
+                onRefresh={onRefresh}
+                ref={isLast ? lastElementRef : null}
+              />
+            );
+          })}
         </tbody>
       </table>
     </div>

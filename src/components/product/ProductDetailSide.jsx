@@ -1,13 +1,17 @@
 import { useState } from "react";
+import { wishListService } from "../../services/wishList";
 
 const ProductDetailSide = ({
+  id,
   name,
   category,
   gender,
   price,
   variants = [],
+  wishList,
 }) => {
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [isWish, setIsWish] = useState(wishList);
 
   const handleSelect = (e) => {
     const selectedId = e.target.value;
@@ -47,6 +51,16 @@ const ProductDetailSide = ({
     setSelectedOptions((prev) =>
       prev.filter((selectedOption) => selectedOption.id !== id)
     );
+  };
+
+  const toggleWishList = async (e) => {
+    e.stopPropagation();
+    try {
+      await wishListService.toggleWishList(id);
+      setIsWish((prev) => !prev);
+    } catch (error) {
+      console.error("찜 토글 실패:", error);
+    }
   };
 
   return (
@@ -125,9 +139,16 @@ const ProductDetailSide = ({
       )}
 
       <div className="flex flex-row gap-4 mt-3">
-        <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
-          찜
-        </button>
+        <div className="flex items-center">
+          <span
+            onClick={(e) => toggleWishList(e)}
+            className={`material-icons text-2xl ${
+              isWish ? "text-red-500" : "text-gray-400"
+            }`}
+          >
+            {isWish ? "favorite" : "favorite_border"}
+          </span>
+        </div>
         <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
           장바구니
         </button>

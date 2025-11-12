@@ -1,9 +1,27 @@
-const ProductDetailMain = ({ name, detailImages = [] }) => {
+import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import Comments from "./Comments";
+import useCommentStore from "../../store/commentStore";
+import CommentForm from "./CommentForm";
+
+const ProductDetailMain = ({ name, detailImages = [], commentCount = 0 }) => {
+  const { id } = useParams();
+
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
   const mainImage =
     detailImages.length > 0
       ? API_URL + "/" + detailImages[0]
       : API_URL + "/images/no-image.png";
+
+  const { comments, getAllComment, addComment } = useCommentStore();
+
+  useEffect(() => {
+    getAllComment(id);
+  }, [id]);
+
+  const handleSubmit = (content) => {
+    addComment(id, {content:content});
+  };
 
   return (
     <>
@@ -53,6 +71,20 @@ const ProductDetailMain = ({ name, detailImages = [] }) => {
         ) : (
           <p className="text-gray-400">상세 이미지가 없습니다.</p>
         )}
+      </div>
+
+      <div className="flex flex-col justify-center items-center gap-8 mt-20 rounded-lg">
+        <span className="relativ px-6 text-2xl font-semibold text-gray-700">
+          후기
+        </span>
+        {comments.length > 0 ? (
+          comments.map((comment, idx) => (
+            <Comments key={idx} className="w-3/4" comment={comment} />
+          ))
+        ) : (
+          <p className="text-gray-400">후기가 없습니다.</p>
+        )}
+        <CommentForm onSubmit={handleSubmit} />
       </div>
     </>
   );
