@@ -28,7 +28,7 @@ const Wishlist = () => {
 
   const mainImage = (detailImage) =>
     detailImage
-      ? API_URL + "/" + detailImage
+      ? API_URL + detailImage
       : API_URL + "/images/no-image.png";
 
   return (

@@ -10,7 +10,7 @@ const ProductDetailMain = ({ name, detailImages = [], commentCount = 0 }) => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
   const mainImage =
     detailImages.length > 0
-      ? API_URL + "/" + detailImages[0]
+      ? API_URL + detailImages[0]
       : API_URL + "/images/no-image.png";
 
   const { comments, getAllComment, addComment } = useCommentStore();
@@ -32,7 +32,7 @@ const ProductDetailMain = ({ name, detailImages = [], commentCount = 0 }) => {
             detailImages.map((img, idx) => (
               <img
                 key={idx}
-                src={API_URL + "/" + img}
+                src={API_URL + img}
                 alt={`${name}-${idx}`}
                 className="w-20 h-20 object-cover rounded-lg cursor-pointer hover:scale-105 transition-transform border border-gray-300"
               />
@@ -63,7 +63,7 @@ const ProductDetailMain = ({ name, detailImages = [], commentCount = 0 }) => {
           detailImages.map((img, idx) => (
             <img
               key={idx}
-              src={API_URL + "/" + img}
+              src={API_URL + img}
               alt={`${name}-detail-${idx}`}
               className="w-3/4 rounded-lg shadow-sm object-cover"
             />
