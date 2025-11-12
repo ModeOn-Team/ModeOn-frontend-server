@@ -4,7 +4,7 @@ const ProductCard = ({ product }) => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
   const mainImage =
     detailImages && detailImages.length > 0
-      ? API_URL + "/" + detailImages[0]
+      ? API_URL + detailImages[0]
       : API_URL + "/images/no-image.png";
   const categories =
     product.category?.largeCategory +
