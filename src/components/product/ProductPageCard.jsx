@@ -12,7 +12,7 @@ const ProductPageCard = ({ product }) => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
   const mainImage =
     product.detailImages && product.detailImages.length > 0
-      ? API_URL + "/" + product.detailImages[0]
+      ? API_URL + product.detailImages[0]
       : API_URL + "/images/no-image.png";
 
   const toggleWishList = async (e, productId) => {
