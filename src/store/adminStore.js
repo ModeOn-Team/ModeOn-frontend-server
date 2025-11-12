@@ -47,10 +47,11 @@ const useAdminStore = create((set) => ({
   },
 
   // productVariant
-  ProductVariantCreate: async (ProductVariantFormData) => {
+  ProductVariantCreate: async (productId, ProductVariantFormData) => {
     set({ loading: true, error: null });
     try {
       const data = await AdminService.ProductVariantCreate(
+        productId,
         ProductVariantFormData
       );
       set({
@@ -66,10 +67,11 @@ const useAdminStore = create((set) => ({
     }
   },
 
-  ProductVariantUpdate: async (ProductVariantFormData) => {
+  ProductVariantUpdate: async (ProductVariantId, ProductVariantFormData) => {
     set({ loading: true, error: null });
     try {
       const data = await AdminService.ProductVariantUpdate(
+        ProductVariantId,
         ProductVariantFormData
       );
       set({

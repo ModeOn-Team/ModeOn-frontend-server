@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@stomp/stompjs": "^7.0.0",
-    "@tosspayments/payment-sdk": "^1.9.2",
     "@tailwindcss/vite": "^4.1.16",
+    "@tosspayments/payment-sdk": "^1.9.2",
     "axios": "^1.13.1",
     "date-fns": "^4.1.0",
     "esbuild": "^0.25.12",
