@@ -11,7 +11,13 @@ const AuthPage = () => {
   return (
     <MainLayout>
       <div className="flex justify-start mt-[3%] gap-40">
-        <div className="w-[40%] h-[500px] bg-amber-900 ml-40">이미지</div>
+        <div className="w-[40%] h-[500px] bg-amber-900 ml-40">
+          <img
+            src="/images/login_banner.png"
+            alt="메인 배너"
+            className="w-full h-full object-cover object-center"
+          />
+        </div>
 
         <div className="flex flex-col items-center justify-center w-full max-w-md">
           {authMode === "login" && <LoginForm onSwitch={setAuthMode} />}
