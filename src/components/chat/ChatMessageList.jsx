@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { formatChatTime } from "../../utils/timeFormatter";
 import useChatStore from "../../store/chatStore";
 import StorageService from "../../services/storage";
 import TypingIndicator from "./TypingIndicator";
@@ -43,7 +42,7 @@ const ChatMessageList = ({ roomId }) => {
       );
     }
 
-    // 시스템 버튼 메시지
+    // 시스템 버튼 메시지 (회색 배경, 검은 글씨)
     if (isSystemButtons) {
       let buttons = [];
       try {
@@ -143,33 +142,33 @@ const ChatMessageList = ({ roomId }) => {
           {message.messageType === "TEXT" && (
             <p className="whitespace-pre-wrap break-words">{message.content}</p>
           )}
-
-          <div
-            className={`text-xs mt-1 ${
-              isOwnMessage ? "text-blue-100" : "text-gray-500"
-            }`}
-          >
-            {formatChatTime(message.timestamp)}
-            {isOwnMessage && (
-              <span className="ml-1">
-                {message.isRead ? "✓✓" : "✓"}
-              </span>
-            )}
-          </div>
         </div>
       </div>
     );
   };
 
+  // 안내사항(SYSTEM_BUTTONS)을 최상단에 고정하기 위해 정렬
+  const sortedMessages = [...roomMessages].sort((a, b) => {
+    const aIsSystemButtons = a.messageType === "SYSTEM_BUTTONS";
+    const bIsSystemButtons = b.messageType === "SYSTEM_BUTTONS";
+    
+    // SYSTEM_BUTTONS 타입은 항상 최상단
+    if (aIsSystemButtons && !bIsSystemButtons) return -1;
+    if (!aIsSystemButtons && bIsSystemButtons) return 1;
+    
+    // 나머지는 시간순 정렬
+    return new Date(a.timestamp) - new Date(b.timestamp);
+  });
+
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-2">
-      {roomMessages.length === 0 ? (
+      {sortedMessages.length === 0 ? (
         <div className="flex items-center justify-center h-full text-gray-400">
           <p>메시지를 불러오는 중...</p>
         </div>
       ) : (
         <>
-          {roomMessages.map(renderMessage)}
+          {sortedMessages.map(renderMessage)}
           {hasTypingUser(roomId) && <TypingIndicator />}
         </>
       )}

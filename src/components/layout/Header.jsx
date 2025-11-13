@@ -48,13 +48,25 @@ const Header = () => {
             <>
               {user.role === "ROLE_ADMIN" && (
                 <div
-                  onClick={() => navigate(import.meta.env.VITE_ADMIN_PAGE_URL)}
+                  onClick={() => navigate(import.meta.env.VITE_ADMIN_PAGE_URL || "/admin")}
                   className="cursor-pointer"
                 >
                   Admin Page
                 </div>
               )}
               <div>LIKE</div>
+              <div
+                onClick={() => {
+                  if (user.role === "ROLE_ADMIN") {
+                    navigate((import.meta.env.VITE_ADMIN_PAGE_URL || "/admin") + "?tab=chat");
+                  } else {
+                    navigate("/chat");
+                  }
+                }}
+                className="cursor-pointer"
+              >
+                CHAT
+              </div>
               <div>CART</div>
               <div onClick={handleLogout} className="cursor-pointer">
                 LOGOUT

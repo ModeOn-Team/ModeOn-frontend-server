@@ -51,7 +51,7 @@ export default function App() {
           }
         />
         <Route
-          path={import.meta.env.VITE_ADMIN_PAGE_URL}
+          path={import.meta.env.VITE_ADMIN_PAGE_URL || "/admin"}
           element={
             isAuthenticated ? <AdminPage /> : <Navigate to="/" replace />
           }

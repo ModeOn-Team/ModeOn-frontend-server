@@ -1,11 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
 import Category from "../components/admin/Category";
 import Product from "../components/admin/Product";
-import Stock from "../components/admin/Stock"
+import Stock from "../components/admin/Stock";
+import AdminChatListPage from "./AdminChatListPage";
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState("category");
+  const [searchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get("tab") || "category";
+  const [activeTab, setActiveTab] = useState(tabFromUrl);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   return (
     <MainLayout>
@@ -43,6 +54,16 @@ const AdminPage = () => {
             >
               재고 관리
             </button>
+            <button
+              onClick={() => setActiveTab("chat")}
+              className={`text-left p-2 rounded ${
+                activeTab === "chat"
+                  ? "bg-black text-white"
+                  : "hover:bg-gray-200"
+              }`}
+            >
+              채팅
+            </button>
           </nav>
         </aside>
 
@@ -50,6 +71,7 @@ const AdminPage = () => {
           {activeTab === "category" && <Category />}
           {activeTab === "product" && <Product />}
           {activeTab === "stock" && <Stock />}
+          {activeTab === "chat" && <AdminChatListPage />}
         </main>
       </div>
     </MainLayout>
