@@ -15,7 +15,9 @@ const Product = () => {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const all = await ProductService.getAllProducts(0);
+        const all = await ProductService.ProductSearch({
+          pageSize: 5,
+        });
         const man = await ProductService.ProductSearch({
           gender: "MAN",
           pageSize: 5,
@@ -29,15 +31,23 @@ const Product = () => {
           pageSize: 5,
         });
 
-        setAllProducts(all.content || []);
-        setManProducts(man.content || []);
-        setWomanProducts(woman.content || []);
-        setKidsProducts(kids.content || []);
+        setAllProducts(
+          all.content?.filter((p) => p.variants?.length > 0) || []
+        );
+        setManProducts(
+          man.content?.filter((p) => p.variants?.length > 0) || []
+        );
+        setWomanProducts(
+          woman.content?.filter((p) => p.variants?.length > 0) || []
+        );
+        setKidsProducts(
+          kids.content?.filter((p) => p.variants?.length > 0) || []
+        );
+        console.log(all);
       } catch (err) {
         console.error("Failed to load products:", err);
       }
     };
-
     loadProducts();
   }, []);
 
@@ -67,10 +77,7 @@ const Product = () => {
           View More →
         </button>
       </div>
-      <ProductList
-        products={manProducts}
-        pageSize={5}
-      />
+      <ProductList products={manProducts} pageSize={5} />
 
       <div className="flex flex-row justify-between">
         <h2 className="text-2xl font-bold mb-4 mt-10">Product For Woman</h2>
@@ -81,10 +88,7 @@ const Product = () => {
           View More →
         </button>
       </div>
-      <ProductList
-        products={womanProducts}
-        pageSize={5}
-      />
+      <ProductList products={womanProducts} pageSize={5} />
 
       <div className="flex flex-row justify-between">
         <h2 className="text-2xl font-bold mb-4 mt-10">Product For Kids</h2>
@@ -95,10 +99,7 @@ const Product = () => {
           View More →
         </button>
       </div>
-      <ProductList
-        products={kidsProducts}
-        pageSize={5}
-      />
+      <ProductList products={kidsProducts} pageSize={5} />
     </div>
   );
 };
