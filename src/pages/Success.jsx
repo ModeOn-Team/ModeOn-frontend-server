@@ -14,6 +14,10 @@ function Success() {
   useEffect(() => {
     if (!paymentKey || !orderId || !amount) return;
 
+  
+    if (sessionStorage.getItem("payment_confirmed")) return;
+    sessionStorage.setItem("payment_confirmed", "true");
+
     const confirmPayment = async () => {
       try {
         await api.post("/api/payment/confirm", {
@@ -53,7 +57,7 @@ function Success() {
           </button>
 
           <button
-            onClick={() => navigate("/orders")}
+            onClick={() => navigate("/")}
             className="border border-gray-400 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-100 transition"
           >
             주문내역 보기

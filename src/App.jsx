@@ -15,6 +15,9 @@ import Fail from "./pages/Fail";
 import HistoryPage from "./pages/HistoryPage";
 import HistoryDetail from "./pages/HistoryDetail";
 
+import ReviewWrite from "./pages/ReviewWrite";
+import ReviewDetail from "./pages/ReviewDetail";
+import ReviewEdit from "./pages/ReviewEdit";
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
@@ -26,11 +29,15 @@ export default function App() {
           path="/"
           element={isAuthenticated ? <Home /> : <Navigate to="/auth" replace />}
         />
+
         <Route path="/oauth2/callback" element={<OAuth2Callback />} />
+
         <Route
           path="/auth"
           element={isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />}
         />
+
+   
         <Route
           path="/chat"
           element={
@@ -53,12 +60,15 @@ export default function App() {
             )
           }
         />
+
         <Route
           path={import.meta.env.VITE_ADMIN_PAGE_URL}
           element={
             isAuthenticated ? <AdminPage /> : <Navigate to="/" replace />
           }
         />
+
+ 
         <Route
           path="/product"
           element={
@@ -67,23 +77,36 @@ export default function App() {
         />
         <Route path="/product/:id" element={<ProductDetailPage />} />
 
-        {/* 결제 관련 */}
         <Route path="/cart" element={<CartPage />} />
         <Route path="/success" element={<Success />} />
         <Route path="/fail" element={<Fail />} />
 
+        <Route
+          path="/orders"
+          element={isAuthenticated ? <HistoryPage /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/orders/:id"
+          element={isAuthenticated ? <HistoryDetail /> : <Navigate to="/auth" replace />}
+        />
 
-      {/* 주문 내역 */}
+
+        <Route
+          path="/review/write/:historyId"
+          element={isAuthenticated ? <ReviewWrite /> : <Navigate to="/auth" replace />}
+        />
+
+
 <Route
-  path="/orders"
-  element={isAuthenticated ? <HistoryPage /> : <Navigate to="/auth" replace />}
+  path="/review/:reviewId"
+  element={isAuthenticated ? <ReviewDetail /> : <Navigate to="/auth" replace />}
 />
 
-{/* 주문 상세 페이지 */}
-<Route
-  path="/orders/:id"
-  element={isAuthenticated ? <HistoryDetail /> : <Navigate to="/auth" replace />}
-/>
+
+        <Route
+          path="/review/edit/:reviewId"
+          element={isAuthenticated ? <ReviewEdit /> : <Navigate to="/auth" replace />}
+        />
 
       </Routes>
     </BrowserRouter>
