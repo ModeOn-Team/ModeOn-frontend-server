@@ -57,7 +57,7 @@ function Success() {
           </button>
 
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/orders")}
             className="border border-gray-400 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-100 transition"
           >
             주문내역 보기
