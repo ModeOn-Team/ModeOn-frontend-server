@@ -1,39 +1,66 @@
 import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import api from "../lib/api";
+import MainLayout from "../components/layout/MainLayout";
 
 function Success() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
 
   const paymentKey = params.get("paymentKey");
   const orderId = params.get("orderId");
   const amount = params.get("amount");
 
   useEffect(() => {
+    if (!paymentKey || !orderId || !amount) return;
+
     const confirmPayment = async () => {
       try {
-        await api.post("/payment/confirm", {
+        await api.post("/api/payment/confirm", {
           paymentKey,
           orderId,
           amount: Number(amount),
         });
-        alert("결제가 정상적으로 완료되었습니다 ");
-
       } catch (err) {
         console.error("결제 승인 실패:", err);
-        alert("결제 승인 중 오류가 발생했습니다.");
       }
     };
 
     confirmPayment();
-  }, []);
+  }, [paymentKey, orderId, amount]);
 
   return (
-    <div style={{ padding: "40px", textAlign: "center" }}>
-      <h2>결제가 완료되었습니다 </h2>
-      <p>주문 번호: {orderId}</p>
-      <p>결제 금액: {Number(amount).toLocaleString()}원</p>
-    </div>
+    <MainLayout>
+      <div className="flex flex-col items-center justify-center py-28">
+        <h2 className="text-2xl font-semibold mb-8">결제가 완료되었습니다.</h2>
+
+        <div className="bg-white shadow-md rounded-2xl p-8 w-full max-w-md text-center space-y-4">
+          <div className="text-gray-600 text-sm">주문 번호</div>
+          <div className="text-lg font-medium">{orderId}</div>
+
+          <div className="text-gray-600 text-sm mt-4">결제 금액</div>
+          <div className="text-3xl font-bold">
+            {Number(amount).toLocaleString()}원
+          </div>
+        </div>
+
+        <div className="flex gap-4 mt-10">
+          <button
+            onClick={() => navigate("/")}
+            className="bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition"
+          >
+            홈으로
+          </button>
+
+          <button
+            onClick={() => navigate("/orders")}
+            className="border border-gray-400 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-100 transition"
+          >
+            주문내역 보기
+          </button>
+        </div>
+      </div>
+    </MainLayout>
   );
 }
 

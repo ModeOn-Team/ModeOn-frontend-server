@@ -13,6 +13,7 @@ import CartPage from "./pages/CartPage";
 import Success from "./pages/Success";
 import Fail from "./pages/Fail";
 import HistoryPage from "./pages/HistoryPage";
+import HistoryDetail from "./pages/HistoryDetail";
 
 
 export default function App() {
@@ -72,11 +73,18 @@ export default function App() {
         <Route path="/fail" element={<Fail />} />
 
 
-       {/* 주문 내역 */}
-       <Route
-       path="/orders"
-       element = {isAuthenticated ? <HistoryPage /> : <Navigate to="/auth" replace />}
+      {/* 주문 내역 */}
+<Route
+  path="/orders"
+  element={isAuthenticated ? <HistoryPage /> : <Navigate to="/auth" replace />}
 />
+
+{/* 주문 상세 페이지 */}
+<Route
+  path="/orders/:id"
+  element={isAuthenticated ? <HistoryDetail /> : <Navigate to="/auth" replace />}
+/>
+
       </Routes>
     </BrowserRouter>
   );

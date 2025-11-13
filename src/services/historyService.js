@@ -5,5 +5,10 @@ export const historyService = {
     const res = await api.get("/api/history");
     return res.data;
   },
+
+  getHistoryDetail: async (id) => {
+    const res = await api.get(`/api/history/${id}`);
+    return res.data;
+  }
 };
 

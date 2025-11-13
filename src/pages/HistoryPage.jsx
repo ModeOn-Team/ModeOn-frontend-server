@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
 import { historyService } from "../services/historyService";
+import { useNavigate } from "react-router-dom";
 
 function HistoryPage() {
   const [history, setHistory] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     historyService.getHistory().then(setHistory);
@@ -24,27 +26,24 @@ function HistoryPage() {
             {history.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center gap-6 p-5 bg-white rounded-xl shadow-sm border hover:shadow-md transition"
+                onClick={() => navigate(`/orders/${item.id}`)}  
+                className="cursor-pointer flex items-center gap-6 p-5 bg-white rounded-xl shadow-sm border hover:shadow-md transition"
               >
-                {/* 상품 이미지 */}
+                
                 <img
-                  src={item.product.thumbnail || item.product.imageUrl}
-                  alt={item.product.name}
+                  src={item.productImage || "https://cdn-icons-png.flaticon.com/512/7596/7596292.png"}
+                  alt={item.productName}
                   className="w-28 h-28 object-cover rounded-lg border"
                 />
 
-                {/* 상품 정보 */}
                 <div className="flex-1 space-y-1">
-                  <h3 className="text-lg font-medium">{item.product.name}</h3>
+                  <h3 className="text-lg font-medium">{item.productName}</h3>
                   <p className="text-gray-500 text-sm">
-                    {item.price.toLocaleString()}원 × {item.count}개
+                    {item.totalPrice.toLocaleString()}원 / {item.count}개
                   </p>
-                  <p className="text-xs text-gray-400">
-                    주문일시 {new Date(item.createdAt).toLocaleString()}
-                  </p>
+                  <p className="text-xs text-gray-400">{item.createdAt} 구매</p>
                 </div>
 
-                {/* 총 가격 */}
                 <div className="text-right font-semibold text-lg">
                   {item.totalPrice.toLocaleString()}원
                 </div>
