@@ -3,7 +3,7 @@ import MainLayout from "../components/layout/MainLayout";
 import Category from "../components/admin/Category";
 import Product from "../components/admin/Product";
 import Stock from "../components/admin/Stock"
-
+import Delivery from "../components/admin/Delivery";
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("category");
 
@@ -43,6 +43,18 @@ const AdminPage = () => {
             >
               재고 관리
             </button>
+            {/*  배송 관리 버튼 */}
+            <button
+              onClick={() => setActiveTab("delivery")}
+              className={`text-left p-2 rounded ${
+                activeTab === "delivery"
+                  ? "bg-black text-white"
+                  : "hover:bg-gray-200"
+              }`}
+            >
+              배송 관리
+            </button>
+
           </nav>
         </aside>
 
@@ -50,6 +62,7 @@ const AdminPage = () => {
           {activeTab === "category" && <Category />}
           {activeTab === "product" && <Product />}
           {activeTab === "stock" && <Stock />}
+          {activeTab === "delivery" && <Delivery />}
         </main>
       </div>
     </MainLayout>

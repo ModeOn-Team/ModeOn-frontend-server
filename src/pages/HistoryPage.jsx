@@ -44,6 +44,28 @@ function HistoryPage() {
                   </p>
                   <p className="text-xs text-gray-400">{item.createdAt} 구매</p>
 
+                   {/* 배송 상태 표시 */}
+                   <p className="text-sm font-semibold mt-1">
+                    배송상태:{" "}
+                    <span className="text-blue-600">
+                      {item.status || "PAID"}
+                    </span>
+                  </p>
+
+                  {/* 운송장 번호 */}
+                  {item.trackingNumber && (
+                    <p className="text-xs text-gray-500">
+                      운송장번호: {item.trackingNumber}
+                    </p>
+                  )}
+
+                  {/* 택배사 */}
+                  {item.courierCode && (
+                    <p className="text-xs text-gray-500">
+                      택배사: {item.courierCode}
+                    </p>
+                  )}
+
                   {/* { 리뷰 버튼 } */}
                   {item.hasReview ? (
                     <button
