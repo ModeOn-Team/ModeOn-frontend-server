@@ -1,12 +1,11 @@
+import api from "./api";
+
 const API_URL = import.meta.env.VITE_API_URL;
 const ADMIN_API = import.meta.env.VITE_ADMIN_API_URL;
 
 export const getUserMembership = async () => {
   try {
-    const response = await fetch(`${API_BASE}/api/membership`, {
-      method: "GET",
-      credentials: "include",
-    });
+    const response = await api.get("/api/membership");
 
     if (!response.ok) {
       const errorText = await response.text();

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
 // 각 탭에 들어갈 컴포넌트 (아직 구현 전)
 import CartPage from "./CartPage";
@@ -11,17 +12,21 @@ import HistoryPage from "./HistoryPage";
 
 const MyPage = () => {
   const [activeTab, setActiveTab] = useState("cart");
+  const navigate = useNavigate();
 
   const tabs = [
     { id: "cart", label: "장바구니" },
     { id: "wishlist", label: "찜 목록" },
-    { id: "points", label: "누적 포인트" },
-    { id: "membership", label: "멤버십 등급" },
-    { id: "coupons", label: "쿠폰" },
     { id: "orders", label: "주문내역" },
-    { id: "reviews", label: "내가 작성한 후기" },
+    // { id: "membership", label: "멤버십 등급" },
+    // { id: "points", label: "누적 포인트" },
+    // { id: "coupons", label: "쿠폰" },
+    // { id: "reviews", label: "내가 작성한 후기" },
   ];
 
+  const handleMembership = () => {
+    navigate("/mypage/membership/1");
+  };
   return (
     <MainLayout>
       <div className="flex min-h-screen mt-10">
@@ -42,6 +47,17 @@ const MyPage = () => {
                 {tab.label}
               </button>
             ))}
+            <button
+              key={tabs.length + 1}
+              onClick={() => handleMembership()}
+              className={`text-left p-2 rounded-md transition ${
+                activeTab === tabs.length + 1
+                  ? "bg-black text-white"
+                  : "hover:bg-gray-200 text-gray-800"
+              }`}
+            >
+              멤버십 등급
+            </button>
           </nav>
         </aside>
 

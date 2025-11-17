@@ -12,11 +12,11 @@ import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import Success from "./pages/Success.jsx";
 import Fail from "./pages/Fail.jsx";
-import MembershipDetailPage from "./pages/MembershipDetailPage.jsx"; // 멤버십
-import MembershipLevelPage from "./pages/MembershipLevelPage.jsx"; // 멤버십 등급
-import CouponPage from "./pages/CouponPage.jsx"; // 쿠폰 페이지
-import PointPage from "./pages/PointPage.jsx"; // 포인트 페이지
-import ReviewPage from "./pages/ReviewPage.jsx"; // 리뷰 페이지
+import MembershipDetailPage from "./pages/MembershipDetailPage.jsx";
+import MembershipLevelPage from "./pages/MembershipLevelPage.jsx";
+import CouponPage from "./pages/CouponPage.jsx";
+import PointPage from "./pages/PointPage.jsx";
+import ReviewPage from "./pages/ReviewPage.jsx";
 import HistoryPage from "./pages/HistoryPage";
 import HistoryDetail from "./pages/HistoryDetail";
 
@@ -143,25 +143,23 @@ export default function App() {
           path="/mypage/membership"
           element={
             isAuthenticated ? (
-              <MembershipDetailPage />
-            ) : (
-              <Navigate to="/auth" replace />
-            )
-          }
-        />
-        <Route
-          path="/mypage/membership/levels"
-          element={
-            isAuthenticated ? (
               <MembershipLevelPage />
             ) : (
               <Navigate to="/auth" replace />
             )
           }
         />
-        {/* 포인트 페이지 */}
+        <Route
+          path="/mypage/membership/:id"
+          element={
+            isAuthenticated ? (
+              <MembershipDetailPage />
+            ) : (
+              <Navigate to="/auth" replace />
+            )
+          }
+        />
         <Route path="/mypage/point" element={<PointPage />} />
-        {/* 쿠폰 페이지 */}
         <Route path="/mypage/coupon" element={<CouponPage />} />
         {/* 결제 관련 */}
         <Route path="/cart" element={<CartPage />} />

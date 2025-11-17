@@ -100,7 +100,7 @@ function MembershipDetailPage() {
       label: "현재 등급",
       value: level,
       color: levelColors[level] || "#4a90e2",
-      onClick: () => navigate("/mypage/membership/levels"), // 모든 등급 비교 페이지로 이동
+      onClick: () => navigate("/mypage/membership"), // 모든 등급 비교 페이지로 이동
     },
     {
       label: "포인트",
