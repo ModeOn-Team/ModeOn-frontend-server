@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/authStore";
+import SearchBar from "../ui/SearchBar";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -12,6 +13,10 @@ const Header = () => {
 
   const handleChangePage = (url) => {
     navigate(url);
+  };
+
+  const handleMypage = () => {
+    navigate("/mypage");
   };
 
   const handleLogIn = () => {
@@ -38,25 +43,25 @@ const Header = () => {
           {/* 중앙: 메뉴 */}
           <nav className="flex gap-15 ml-70">
             <div
-              onClick={() => handleChangePage("/product?gender=null")}
+              onClick={() => handleChangePage("/Product?gender=null")}
               className="cursor-pointer"
             >
               ALL
             </div>
             <div
-              onClick={() => handleChangePage("/product?gender=MAN")}
+              onClick={() => handleChangePage("/Product?gender=MAN")}
               className="cursor-pointer"
             >
               MAN
             </div>
             <div
-              onClick={() => handleChangePage("/product?gender=WOMAN")}
+              onClick={() => handleChangePage("/Product?gender=WOMAN")}
               className="cursor-pointer"
             >
               WOMAN
             </div>
             <div
-              onClick={() => handleChangePage("/product?gender=KIDS")}
+              onClick={() => handleChangePage("/Product?gender=KIDS")}
               className="cursor-pointer"
             >
               KIDS
@@ -65,8 +70,10 @@ const Header = () => {
         </div>
 
         {/* 우측: 아이콘 / 로그인 */}
-        <div className="flex gap-4">
-          <div>SEARCH BARRRRRRR</div>
+        <div className="flex gap-4 items-center">
+          <div className="mr-20">
+            <SearchBar />
+          </div>
           {user ? (
             <>
               {/* 🚨 [추가된 My Page 버튼] */}
@@ -85,8 +92,9 @@ const Header = () => {
                   Admin Page
                 </div>
               )}
-              <div>LIKE</div>
-              <div>CART</div>
+              <div onClick={handleMypage} className="cursor-pointer">
+                MyPage
+              </div>
               <div onClick={handleLogout} className="cursor-pointer">
                 LOGOUT
               </div>

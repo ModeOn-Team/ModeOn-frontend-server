@@ -2,6 +2,9 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import OAuth2Callback from "./pages/OAuth2Callback.jsx";
 import Home from "./pages/home.jsx";
 import AuthPage from "./pages/authPage.jsx";
+import ChatListPage from "./pages/ChatListPage.jsx";
+import ChatRoomPage from "./pages/ChatRoomPage.jsx";
+import AdminChatListPage from "./pages/AdminChatListPage.jsx";
 import useAuthStore from "./store/authStore.js";
 import AdminPage from "./pages/adminPage.jsx";
 import ProductPage from "./pages/ProductPage.jsx";
@@ -9,12 +12,16 @@ import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import Success from "./pages/Success.jsx";
 import Fail from "./pages/Fail.jsx";
-import MyPage from "./pages/MyPage.jsx"; // MyPage
 import MembershipDetailPage from "./pages/MembershipDetailPage.jsx"; // 멤버십
 import MembershipLevelPage from "./pages/MembershipLevelPage.jsx"; // 멤버십 등급
 import CouponPage from "./pages/CouponPage.jsx"; // 쿠폰 페이지
 import PointPage from "./pages/PointPage.jsx"; // 포인트 페이지
 import ReviewPage from "./pages/ReviewPage.jsx"; // 리뷰 페이지
+import CartPage from "./pages/CartPage";
+import Success from "./pages/Success";
+import Fail from "./pages/Fail";
+import Mypage from "./pages/myPage";
+import SearchProductPage from "./pages/searchProductPage.jsx";
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
@@ -34,7 +41,29 @@ export default function App() {
           element={isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />}
         />
         <Route
-          path={adminPageUrl}
+          path="/chat"
+          element={
+            isAuthenticated ? <ChatListPage /> : <Navigate to="/auth" replace />
+          }
+        />
+        <Route
+          path="/chat/:roomId"
+          element={
+            isAuthenticated ? <ChatRoomPage /> : <Navigate to="/auth" replace />
+          }
+        />
+        <Route
+          path="/chat/admin"
+          element={
+            isAuthenticated ? (
+              <AdminChatListPage />
+            ) : (
+              <Navigate to="/auth" replace />
+            )
+          }
+        />
+        <Route
+          path={import.meta.env.VITE_ADMIN_PAGE_URL}
           element={
             isAuthenticated ? <AdminPage /> : <Navigate to="/auth" replace />
           }
@@ -44,6 +73,20 @@ export default function App() {
           element={
             isAuthenticated ? <ProductPage /> : <Navigate to="/auth" replace />
           }
+        />
+        <Route
+          path="/search"
+          element={
+            isAuthenticated ? (
+              <SearchProductPage />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/mypage"
+          element={isAuthenticated ? <Mypage /> : <Navigate to="/" replace />}
         />
         <Route path="/product/:id" element={<ProductDetailPage />} />
         <Route
@@ -82,7 +125,7 @@ export default function App() {
         <Route path="/fail" element={<Fail />} />
         {/* 리뷰 관련 */}
         <Route path="/mypage/point" element={<PointPage />} />
-        <Route path="/mypage/reviews" element={<ReviewPage />} /> {/* 추가 */}
+        <Route path="/mypage/reviews" element={<ReviewPage />} />
       </Routes>
     </BrowserRouter>
   );

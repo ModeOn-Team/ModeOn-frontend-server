@@ -29,26 +29,25 @@ const ProductVariantModal = ({ product, onClose }) => {
   const [color, setColor] = useState(COLORS[0].name);
   const [stock, setStock] = useState(1);
 
-const handleSubmit = async () => {
-  try {
-    const res = await ProductVariantCreate({
-      productId: product.id,
-      size,
-      color,
-      stock,
-    });
+  const handleSubmit = async () => {
+    try {
+      const res = await ProductVariantCreate(product.id, {
+        size,
+        color,
+        stock,
+      });
 
-    if (res?.error) {
-      alert("에러가 발생했습니다: " + res.error);
-    } else {
-      alert("재고가 성공적으로 추가되었습니다!");
-      onClose();
+      if (res?.error) {
+        alert("에러가 발생했습니다: " + res.error);
+      } else {
+        alert("재고가 성공적으로 추가되었습니다!");
+        onClose();
+      }
+    } catch (err) {
+      console.log(err);
+      alert("서버 오류가 발생했습니다.");
     }
-  } catch (err) {
-    console.log(err);
-    alert("서버 오류가 발생했습니다.");
-  }
-};
+  };
 
   return (
     <div

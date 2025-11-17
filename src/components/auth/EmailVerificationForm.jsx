@@ -56,14 +56,10 @@ const EmailVerificationForm = ({ onSwitch, mode }) => {
   const VerifyhandleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log("mode:", mode);
       if (mode === "changePassword") {
-        console.log("Attempting to get password reset code",  formData.code, formData.email);
         const token = await PasswordResetCode(formData.code, formData.email);
-        console.log("token:", token);
 
         setFormData((prev) => ({ ...prev, authCode: token }));
-        console.log("formData after setting token:", formData);
         setIsVerified(true);
       } else if (mode === "emailVerification") {
         await verifyEmail(formData.code, formData.email);
