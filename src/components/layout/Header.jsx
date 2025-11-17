@@ -76,9 +76,17 @@ const Header = () => {
           </div>
           {user ? (
             <>
+              {/* 🚨 [추가된 My Page 버튼] */}
+              <div
+                onClick={() => navigate("/mypage")}
+                className="cursor-pointer"
+              >
+                My Page
+              </div>
+
               {user.role === "ROLE_ADMIN" && (
                 <div
-                  onClick={() => navigate(import.meta.env.VITE_ADMIN_PAGE_URL)}
+                  onClick={() => navigate("/admin")}
                   className="cursor-pointer"
                 >
                   Admin Page
