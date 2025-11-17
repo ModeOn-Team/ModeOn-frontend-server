@@ -20,6 +20,14 @@ import ReviewPage from "./pages/ReviewPage.jsx"; // 리뷰 페이지
 import CartPage from "./pages/CartPage";
 import Success from "./pages/Success";
 import Fail from "./pages/Fail";
+import HistoryPage from "./pages/HistoryPage";
+import HistoryDetail from "./pages/HistoryDetail";
+
+import ReviewWrite from "./pages/ReviewWrite";
+import ReviewDetail from "./pages/ReviewDetail";
+import ReviewEdit from "./pages/ReviewEdit";
+import RequestPage from "./pages/RequestPage";
+
 import Mypage from "./pages/myPage";
 import SearchProductPage from "./pages/searchProductPage.jsx";
 
@@ -35,11 +43,14 @@ export default function App() {
           path="/"
           element={isAuthenticated ? <Home /> : <Navigate to="/auth" replace />}
         />
+
         <Route path="/oauth2/callback" element={<OAuth2Callback />} />
+
         <Route
           path="/auth"
           element={isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />}
         />
+
         <Route
           path="/chat"
           element={
@@ -62,12 +73,14 @@ export default function App() {
             )
           }
         />
+
         <Route
           path={import.meta.env.VITE_ADMIN_PAGE_URL}
           element={
             isAuthenticated ? <AdminPage /> : <Navigate to="/auth" replace />
           }
         />
+
         <Route
           path="/product"
           element={
@@ -89,6 +102,40 @@ export default function App() {
           element={isAuthenticated ? <Mypage /> : <Navigate to="/" replace />}
         />
         <Route path="/product/:id" element={<ProductDetailPage />} />
+
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/success" element={<Success />} />
+        <Route path="/fail" element={<Fail />} />
+
+        <Route
+          path="/orders"
+          element={isAuthenticated ? <HistoryPage /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/orders/:id"
+          element={isAuthenticated ? <HistoryDetail /> : <Navigate to="/auth" replace />}
+        />
+
+        <Route
+          path="/orders/:id/request"
+          element={isAuthenticated ? <RequestPage /> : <Navigate to="/auth" replace />}
+        />
+
+        <Route
+          path="/review/write/:historyId"
+          element={isAuthenticated ? <ReviewWrite /> : <Navigate to="/auth" replace />}
+        />
+
+        <Route
+          path="/review/:reviewId"
+          element={isAuthenticated ? <ReviewDetail /> : <Navigate to="/auth" replace />}
+        />
+
+        <Route
+          path="/review/edit/:reviewId"
+          element={isAuthenticated ? <ReviewEdit /> : <Navigate to="/auth" replace />}
+        />
+
         <Route
           path="/mypage"
           element={
@@ -127,6 +174,7 @@ export default function App() {
         <Route path="/mypage/point" element={<PointPage />} />
         <Route path="/mypage/reviews" element={<ReviewPage />} />
       </Routes>
+
     </BrowserRouter>
   );
 }

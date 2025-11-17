@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { cartService } from "../../services/cartService";
+
 import { wishListService } from "../../services/wishList";
 
 const ProductDetailSide = ({
@@ -53,6 +55,22 @@ const ProductDetailSide = ({
     );
   };
 
+  const handleAddToCart = async () => {
+    if (selectedOptions.length === 0) {
+      alert("옵션을 선택해주세요.");
+      return;
+    }
+    try {
+      for (const option of selectedOptions) {
+        await cartService.addItem(option.id, option.quantity);
+      }
+      alert("장바구니에 담겼습니다!");
+    } catch (err) {
+      console.error(err);
+      alert("장바구니 담기 실패!");
+    }
+  };
+  
   const toggleWishList = async (e) => {
     e.stopPropagation();
     try {
@@ -138,6 +156,23 @@ const ProductDetailSide = ({
         </div>
       )}
 
+<div className="flex flex-row gap-4 mt-3">
+  <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
+    찜
+  </button>
+
+  <button
+    onClick={handleAddToCart}
+    className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition"
+  >
+    장바구니
+  </button>
+
+  <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
+    구매하기
+  </button>
+</div>
+
       <div className="flex flex-row gap-4 mt-3">
         <div className="flex items-center">
           <span
@@ -166,7 +201,12 @@ const ProductDetailSide = ({
 
       <p className="font-semibold mb-2 mt-4">이 상품을 활용한 사진 후기</p>
       <div className="text-gray-400 text-sm">아직 등록된 후기가 없습니다.</div>
+      
+
+      
     </>
+
+    
   );
 };
 
