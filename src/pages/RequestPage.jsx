@@ -14,6 +14,10 @@ export default function RequestPage() {
   const [reasonType, setReasonType] = useState("단순 변심");
   const [reasonDetail, setReasonDetail] = useState("");
 
+  // 이미지 업로드 상태
+  const [images, setImages] = useState([]);
+  const [previews, setPreviews] = useState([]);
+
   useEffect(() => {
     const load = async () => {
       const res = await api.get(`/api/history/${id}`);
@@ -24,24 +28,43 @@ export default function RequestPage() {
 
   if (!info) return null;
 
+  /* 이미지 선택 */
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImages(files);
+
+    const previewsUrl = files.map((file) => URL.createObjectURL(file));
+    setPreviews(previewsUrl);
+  };
+
   const handleSubmit = async () => {
-    if (!reasonDetail.trim()) return alert(" 상세 사유를 입력해주세요.");
-
+    if (!reasonDetail.trim()) return alert("상세 사유를 입력해주세요.");
+  
     try {
-      const endpoint = type === "REFUND"
-        ? `/api/history/${id}/refund`
-        : `/api/history/${id}/exchange`;
-
-      await api.post(endpoint, {
-        reason: `${reasonType} - ${reasonDetail}`
+      const endpoint =
+        type === "REFUND"
+          ? `/api/history/${id}/refund`
+          : `/api/history/${id}/exchange`;
+  
+      const formData = new FormData();
+      formData.append("reason", `${reasonType} - ${reasonDetail}`);
+  
+      images.forEach((file) => {
+        formData.append("images", file);
       });
-
+  
+      await api.post(endpoint, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+  
       alert(type === "REFUND" ? "환불 요청 완료!" : "교환 요청 완료!");
       navigate("/orders");
-    } catch {
+    } catch (err) {
+      console.error(err);
       alert("요청 처리 중 오류가 발생했습니다.");
     }
   };
+  
 
   return (
     <MainLayout>
@@ -113,7 +136,32 @@ export default function RequestPage() {
             value={reasonDetail}
             onChange={(e) => setReasonDetail(e.target.value)}
           />
+
+
         </div>
+                  {/* 이미지 업로드 */}
+                  <div className="space-y-2">
+            <p className="font-semibold text-sm">사진 첨부 (여러 장 가능)</p>
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+
+            {/* 미리보기 */}
+            {previews.length > 0 && (
+              <div className="grid grid-cols-3 gap-3 pt-2">
+                {previews.map((src, i) => (
+                  <img
+                    key={i}
+                    src={src}
+                    className="w-full h-24 object-cover rounded-lg border"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
 
         <button
           onClick={handleSubmit}

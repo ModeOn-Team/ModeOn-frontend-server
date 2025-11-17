@@ -28,7 +28,6 @@ function HistoryDetail() {
 
   if (!info) return null;
 
-  // 배송 상태 한글 변환 맵
   const statusKorean = {
     PAID: "결제 완료",
     PREPARING: "배송 준비중",
@@ -59,7 +58,7 @@ function HistoryDetail() {
 
         <h2 className="text-3xl font-bold mb-4">주문 상세 내역</h2>
 
-        {/* 요청 상태 라벨 */}
+
         {info.requestStatus && (
           <span
             className="
@@ -152,7 +151,6 @@ function HistoryDetail() {
             />
           </div>
 
-          {/* 날짜 3개만 표시 */}
           <div className="text-sm space-y-1 pt-2 text-gray-700">
             <p><strong>결제 완료:</strong> {info.createdAt}</p>
             <p><strong>배송 시작:</strong> {info.shippedAt || "-"}</p>
@@ -160,7 +158,7 @@ function HistoryDetail() {
           </div>
         </div>
 
-        {/* 배송 정보 → 중복 제거 후 간단하게 */}
+
         <div className="bg-white p-8 rounded-3xl border shadow space-y-3">
           <h3 className="text-xl font-semibold">배송 정보</h3>
 
@@ -173,10 +171,10 @@ function HistoryDetail() {
             <p className="text-xs text-gray-500">배송 정보가 없습니다.</p>
           )}
         </div>
-        {/* 버튼 전체 컨테이너 */}
+      
 <div className="flex justify-between items-center mt-10">
 
-{/* 왼쪽: 리뷰 버튼 */}
+
 <div>
   {review ? (
     <button
@@ -195,7 +193,6 @@ function HistoryDetail() {
   )}
 </div>
 
-{/* 오른쪽: 주문내역 · 홈으로 */}
 <div className="flex gap-3">
   <button
     onClick={() => navigate("/orders")}

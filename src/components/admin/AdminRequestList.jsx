@@ -102,7 +102,6 @@ function AdminRequestList() {
         </tbody>
       </table>
 
-      {/* 모달 */}
       {selected && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
           <div className="bg-white p-6 rounded-xl w-96 space-y-4 shadow-lg">
