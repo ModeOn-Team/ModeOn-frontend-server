@@ -12,6 +12,19 @@ import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import CartPage from "./pages/CartPage";
 import Success from "./pages/Success";
 import Fail from "./pages/Fail";
+import MembershipDetailPage from "./pages/MembershipDetailPage.jsx";
+import MembershipLevelPage from "./pages/MembershipLevelPage.jsx";
+import CouponPage from "./pages/CouponPage.jsx";
+import PointPage from "./pages/PointPage.jsx";
+import ReviewPage from "./pages/ReviewPage.jsx";
+import HistoryPage from "./pages/HistoryPage";
+import HistoryDetail from "./pages/HistoryDetail";
+import ReviewWrite from "./pages/ReviewWrite";
+import ReviewDetail from "./pages/ReviewDetail";
+import ReviewEdit from "./pages/ReviewEdit";
+import RequestPage from "./pages/RequestPage";
+import Mypage from "./pages/myPage";
+import SearchProductPage from "./pages/searchProductPage.jsx";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 
 export default function App() {
@@ -66,11 +79,70 @@ export default function App() {
           }
         />
         <Route path="/product/:id" element={<ProductDetailPage />} />
-
-        {/* 결제 관련 */}
+        <Route
+          path="/search"
+          element={
+            isAuthenticated ? (
+              <SearchProductPage />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/success" element={<Success />} />
         <Route path="/fail" element={<Fail />} />
+        <Route
+          path="/orders"
+          element={isAuthenticated ? <HistoryPage /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/orders/:id"
+          element={isAuthenticated ? <HistoryDetail /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/orders/:id/request"
+          element={isAuthenticated ? <RequestPage /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/review/write/:historyId"
+          element={isAuthenticated ? <ReviewWrite /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/review/:reviewId"
+          element={isAuthenticated ? <ReviewDetail /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/review/edit/:reviewId"
+          element={isAuthenticated ? <ReviewEdit /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/mypage"
+          element={isAuthenticated ? <Mypage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/mypage/membership"
+          element={
+            isAuthenticated ? (
+              <MembershipDetailPage />
+            ) : (
+              <Navigate to="/auth" replace />
+            )
+          }
+        />
+        <Route
+          path="/mypage/membership/levels"
+          element={
+            isAuthenticated ? (
+              <MembershipLevelPage />
+            ) : (
+              <Navigate to="/auth" replace />
+            )
+          }
+        />
+        <Route path="/mypage/point" element={<PointPage />} />
+        <Route path="/mypage/coupon" element={<CouponPage />} />
+        <Route path="/mypage/reviews" element={<ReviewPage />} />
       </Routes>
     </BrowserRouter>
   );
