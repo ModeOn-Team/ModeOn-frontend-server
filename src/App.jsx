@@ -18,6 +18,8 @@ import HistoryDetail from "./pages/HistoryDetail";
 import ReviewWrite from "./pages/ReviewWrite";
 import ReviewDetail from "./pages/ReviewDetail";
 import ReviewEdit from "./pages/ReviewEdit";
+import RequestPage from "./pages/RequestPage";
+
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
@@ -37,7 +39,6 @@ export default function App() {
           element={isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />}
         />
 
-   
         <Route
           path="/chat"
           element={
@@ -68,7 +69,6 @@ export default function App() {
           }
         />
 
- 
         <Route
           path="/product"
           element={
@@ -90,18 +90,20 @@ export default function App() {
           element={isAuthenticated ? <HistoryDetail /> : <Navigate to="/auth" replace />}
         />
 
+        <Route
+          path="/orders/:id/request"
+          element={isAuthenticated ? <RequestPage /> : <Navigate to="/auth" replace />}
+        />
 
         <Route
           path="/review/write/:historyId"
           element={isAuthenticated ? <ReviewWrite /> : <Navigate to="/auth" replace />}
         />
 
-
-<Route
-  path="/review/:reviewId"
-  element={isAuthenticated ? <ReviewDetail /> : <Navigate to="/auth" replace />}
-/>
-
+        <Route
+          path="/review/:reviewId"
+          element={isAuthenticated ? <ReviewDetail /> : <Navigate to="/auth" replace />}
+        />
 
         <Route
           path="/review/edit/:reviewId"
@@ -109,6 +111,7 @@ export default function App() {
         />
 
       </Routes>
+
     </BrowserRouter>
   );
 }

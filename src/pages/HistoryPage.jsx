@@ -11,94 +11,184 @@ function HistoryPage() {
     historyService.getHistory().then(setHistory);
   }, []);
 
+  // 배송 상태 배지
+  const statusBadge = {
+    PAID: { label: "결제 완료", color: "bg-gray-500" },
+    PREPARING: { label: "배송 준비중", color: "bg-yellow-500" },
+    SHIPPING: { label: "배송중", color: "bg-blue-600" },
+    DELIVERED: { label: "배송 완료", color: "bg-green-600" },
+  };
+
+  // 교환/환불 상태 텍스트
+  const requestStatusText = {
+    REFUND_REQUEST: "환불 요청 진행중",
+    REFUND_APPROVED: "환불 승인됨",
+    REFUND_REJECTED: "환불 거절됨",
+    EXCHANGE_REQUEST: "교환 요청 진행중",
+    EXCHANGE_APPROVED: "교환 승인됨",
+    EXCHANGE_REJECTED: "교환 거절됨",
+  };
+
   return (
     <MainLayout>
       <div className="max-w-screen-lg mx-auto py-10 px-4 space-y-10">
-
         <h1 className="text-2xl font-semibold">주문 내역</h1>
 
+        {/* 주문 없는 경우 */}
         {history.length === 0 ? (
           <div className="text-center text-gray-500 py-20">
             아직 구매한 상품이 없습니다.
           </div>
         ) : (
           <div className="space-y-6">
-            {history.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center gap-6 p-5 bg-white rounded-xl shadow-sm border"
-              >
-                
-                {/* 상품 이미지 */}
-                <img
-                  src={item.productImage || "https://cdn-icons-png.flaticon.com/512/7596/7596292.png"}
-                  alt={item.productName}
-                  className="w-28 h-28 object-cover rounded-lg border"
-                />
-
-                {/* 상품 정보 */}
-                <div className="flex-1 space-y-1">
-                  <h3 className="text-lg font-medium">{item.productName}</h3>
-                  <p className="text-gray-500 text-sm">
-                    {item.totalPrice.toLocaleString()}원 / {item.count}개
-                  </p>
-                  <p className="text-xs text-gray-400">{item.createdAt} 구매</p>
-
-                   {/* 배송 상태 표시 */}
-                   <p className="text-sm font-semibold mt-1">
-                    배송상태:{" "}
-                    <span className="text-blue-600">
-                      {item.status || "PAID"}
-                    </span>
-                  </p>
-
-                  {/* 운송장 번호 */}
-                  {item.trackingNumber && (
-                    <p className="text-xs text-gray-500">
-                      운송장번호: {item.trackingNumber}
-                    </p>
-                  )}
-
-                  {/* 택배사 */}
-                  {item.courierCode && (
-                    <p className="text-xs text-gray-500">
-                      택배사: {item.courierCode}
-                    </p>
-                  )}
-
-                  {/* { 리뷰 버튼 } */}
-                  {item.hasReview ? (
-                    <button
-                    onClick={() => navigate(`/review/${item.reviewId}`)}
-
-                      className="text-blue-600 text-sm underline font-medium"
-                    >
-                      리뷰 보기
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => navigate(`/review/write/${item.id}`)}
-                      className="text-black text-sm underline font-medium"
-                    >
-                      리뷰 쓰기
-                    </button>
-                  )}
-                </div>
-
-                {/*주문 상세 보기 버튼 */}
-                <div className="text-right">
-                  <div className="font-semibold text-lg mb-3">
-                    {item.totalPrice.toLocaleString()}원
-                  </div>
-                  <button
+            {history.map((item) => {
+              const statusKey = (item.status || "PAID").toUpperCase();
+              return (
+                <div
+                  key={item.id}
+                  className="
+                    flex items-start gap-6 
+                    p-6 bg-white rounded-xl 
+                    shadow-sm border 
+                    hover:shadow-md transition
+                  "
+                >
+                  {/* 상품 이미지 */}
+                  <img
                     onClick={() => navigate(`/orders/${item.id}`)}
-                    className="text-sm border px-3 py-1 rounded-md hover:bg-gray-100"
-                  >
-                    상세보기
-                  </button>
+                    src={
+                      item.productImage ||
+                      "https://cdn-icons-png.flaticon.com/512/7596/7596292.png"
+                    }
+                    alt={item.productName}
+                    className="
+                      w-28 h-28 rounded-lg object-cover border
+                      cursor-pointer hover:scale-105 transition
+                    "
+                  />
+
+                  {/* 상품 정보 */}
+                  <div className="flex-1 space-y-2">
+                    {/* 상품명 */}
+                    <h3
+                      className="text-lg font-semibold cursor-pointer hover:underline"
+                      onClick={() => navigate(`/orders/${item.id}`)}
+                    >
+                      {item.productName}
+                    </h3>
+
+                    {/* 금액/수량 */}
+                    <p className="text-gray-700 text-sm">
+                      <span className="font-semibold text-[15px]">
+                        {item.totalPrice.toLocaleString()}원
+                      </span>{" "}
+                      · {item.count}개
+                    </p>
+
+                    {/* 구매일 */}
+                    <p className="text-xs text-gray-400">
+                      {item.createdAt} 구매
+                    </p>
+
+                    {/* 배송 상태 */}
+                    <div className="mt-1">
+                      <span className="text-gray-700 text-sm font-medium mr-2">
+                        배송상태:
+                      </span>
+
+                      <span
+                        className={`
+                          px-2 py-1 rounded-full text-white text-xs font-semibold
+                          ${statusBadge[statusKey]?.color || "bg-gray-500"}
+                        `}
+                      >
+                        {statusBadge[statusKey]?.label || "결제 완료"}
+                      </span>
+                    </div>
+
+                    {/* 교환/환불 요청 상태 */}
+                    {item.requestStatus && (
+                      <p className="text-sm font-medium flex items-center gap-2 mt-1">
+                        <span className="text-gray-700">요청상태:</span>
+                        <span
+                          className={`
+                            px-2 py-1 rounded-full text-white text-xs
+                            ${
+                              item.requestStatus.includes("APPROVED")
+                                ? "bg-green-600"
+                                : item.requestStatus.includes("REJECTED")
+                                ? "bg-red-600"
+                                : "bg-yellow-600"
+                            }
+                          `}
+                        >
+                          {requestStatusText[item.requestStatus]}
+                        </span>
+                      </p>
+                    )}
+
+                    {/* 운송장 택배사 */}
+                    <div className="space-y-1 text-xs text-gray-500">
+                      {item.trackingNumber && (
+                        <p>운송장번호: {item.trackingNumber}</p>
+                      )}
+                      {item.courierCode && (
+                        <p>택배사: {item.courierCode}</p>
+                      )}
+                    </div>
+
+                    {/* 버튼 */}
+                    <div className="flex items-center gap-3 mt-2">
+                      {/* 리뷰 */}
+                      {item.hasReview ? (
+                        <button
+                          onClick={() => navigate(`/review/${item.reviewId}`)}
+                          className="px-3 py-1.5 rounded-lg border text-sm hover:bg-gray-50 transition"
+                        >
+                          리뷰 보기
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => navigate(`/review/write/${item.id}`)}
+                          className="px-3 py-1.5 rounded-lg border text-sm hover:bg-gray-50 transition"
+                        >
+                          리뷰 쓰기
+                        </button>
+                      )}
+
+                      {/* 교환 환불 */}
+                      {statusKey === "DELIVERED" && (
+                        <button
+                          onClick={() =>
+                            navigate(`/orders/${item.id}/request`)
+                          }
+                          className="
+                            px-3 py-1.5 rounded-lg border border-red-400 
+                            text-red-600 text-sm hover:bg-red-50 transition
+                          "
+                        >
+                          교환/환불
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 우측 영역 */}
+                  <div className="text-right flex flex-col justify-between h-full">
+                    <div className="font-bold text-lg text-gray-900">
+                      {item.totalPrice.toLocaleString()}원
+                    </div>
+
+                    <button
+                      onClick={() => navigate(`/orders/${item.id}`)}
+                      className="px-3 py-1.5 rounded-lg border text-sm hover:bg-gray-100 transition"
+                    >
+                      상세보기
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
