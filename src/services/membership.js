@@ -4,10 +4,10 @@ const API_URL = import.meta.env.VITE_API_URL;
 const ADMIN_API = import.meta.env.VITE_ADMIN_API_URL;
 
 export const MembershipService = {
-  async getUserMembership() {
-    const response = await api.get(`/api/membership/`);
-    return response.data;
-  },
+  // getUserMembership: async () => {
+  //   const response = await api.get(`/api/membership/`);
+  //   return response.data;
+  // },
 
   async getUserMembership() {
     try {

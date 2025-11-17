@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout.jsx";
-import { getUserMembership } from "../services/membership.js";
+import { MembershipService } from "../services/membership.js";
 
 const levels = [
   {
@@ -71,7 +71,7 @@ function MembershipLevelPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await getUserMembership();
+        const data = await MembershipService.getUserMembership();
         setUserData(data);
         setError(null);
       } catch (err) {
