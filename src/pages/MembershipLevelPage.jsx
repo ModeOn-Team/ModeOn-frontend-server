@@ -207,7 +207,7 @@ function MembershipLevelPage() {
                 >
                   {level.name}
                   {isCurrent && (
-                    <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       현재
                     </span>
                   )}

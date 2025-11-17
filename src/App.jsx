@@ -9,9 +9,9 @@ import useAuthStore from "./store/authStore.js";
 import AdminPage from "./pages/adminPage.jsx";
 import ProductPage from "./pages/ProductPage.jsx";
 import ProductDetailPage from "./pages/ProductDetailPage.jsx";
-import CartPage from "./pages/CartPage";
-import Success from "./pages/Success";
-import Fail from "./pages/Fail";
+import CartPage from "./pages/CartPage.jsx";
+import Success from "./pages/Success.jsx";
+import Fail from "./pages/Fail.jsx";
 import MembershipDetailPage from "./pages/MembershipDetailPage.jsx";
 import MembershipLevelPage from "./pages/MembershipLevelPage.jsx";
 import CouponPage from "./pages/CouponPage.jsx";
@@ -118,23 +118,25 @@ export default function App() {
         />
         <Route
           path="/mypage"
-          element={isAuthenticated ? <Mypage /> : <Navigate to="/" replace />}
+          element={
+            isAuthenticated ? <Mypage /> : <Navigate to="/auth" replace />
+          }
         />
         <Route
           path="/mypage/membership"
           element={
             isAuthenticated ? (
-              <MembershipDetailPage />
+              <MembershipLevelPage />
             ) : (
               <Navigate to="/auth" replace />
             )
           }
         />
         <Route
-          path="/mypage/membership/levels"
+          path="/mypage/membership/:id"
           element={
             isAuthenticated ? (
-              <MembershipLevelPage />
+              <MembershipDetailPage />
             ) : (
               <Navigate to="/auth" replace />
             )

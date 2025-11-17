@@ -1,11 +1,12 @@
 import { useParams } from "react-router-dom";
-import { useEffect } from "react";
-import Comments from "./Comments";
+import { useEffect, useState } from "react";
 import useCommentStore from "../../store/commentStore";
-import CommentForm from "./CommentForm";
+import { reviewService } from "../../services/reviewService";
+
 
 const ProductDetailMain = ({ name, detailImages = [], commentCount = 0 }) => {
   const { id } = useParams();
+  const [reviews, setReviews] = useState([]);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
   const mainImage =
@@ -17,10 +18,21 @@ const ProductDetailMain = ({ name, detailImages = [], commentCount = 0 }) => {
 
   useEffect(() => {
     getAllComment(id);
+
+    const loadReviews = async () => {
+      try {
+        const list = await reviewService.getReviewsByProduct(id);
+        setReviews(list);
+      } catch (err) {
+        console.error("리뷰 불러오기 실패:", err);
+      }
+    };
+
+    loadReviews();
   }, [id]);
 
   const handleSubmit = (content) => {
-    addComment(id, {content:content});
+    addComment(id, { content: content });
   };
 
   return (
@@ -73,18 +85,32 @@ const ProductDetailMain = ({ name, detailImages = [], commentCount = 0 }) => {
         )}
       </div>
 
-      <div className="flex flex-col justify-center items-center gap-8 mt-20 rounded-lg">
-        <span className="relativ px-6 text-2xl font-semibold text-gray-700">
-          후기
-        </span>
-        {comments.length > 0 ? (
-          comments.map((comment, idx) => (
-            <Comments key={idx} className="w-3/4" comment={comment} />
-          ))
+      <div className="p-10 mt-10">
+        <h2 className="text-2xl font-semibold mb-6">이 상품 실 사용자 후기</h2>
+
+        {reviews.length === 0 ? (
+          <p className="text-gray-500">아직 등록된 후기가 없습니다.</p>
         ) : (
-          <p className="text-gray-400">후기가 없습니다.</p>
+          <div className="space-y-6">
+            {reviews.map((r) => (
+              <div
+                key={r.id}
+                className="border rounded-xl p-5 bg-white shadow-sm"
+              >
+                <div className="flex justify-between mb-2">
+                  <span className="font-medium">{r.userName}</span>
+                  <span className="text-yellow-500 text-lg">
+                    {"⭐".repeat(r.rating)}
+                  </span>
+                </div>
+
+                <p className="text-gray-800 whitespace-pre-line">{r.content}</p>
+
+                <p className="text-gray-400 text-xs mt-2">{r.createdAt}</p>
+              </div>
+            ))}
+          </div>
         )}
-        <CommentForm onSubmit={handleSubmit} />
       </div>
     </>
   );

@@ -11,7 +11,6 @@ const useWishListStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       const data = await wishListService.getMyWishList(page);
-      console.log(data);
       set((state) => ({
         myWishList: data.content,
         loading: false,

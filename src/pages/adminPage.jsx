@@ -4,7 +4,7 @@ import MainLayout from "../components/layout/MainLayout";
 import Category from "../components/admin/Category";
 import Product from "../components/admin/Product";
 import AdminChatListPage from "./AdminChatListPage";
-import Stock from "../components/admin/Stock"
+import Stock from "../components/admin/Stock";
 import Delivery from "../components/admin/Delivery";
 import AdminRequestList from "../components/admin/AdminRequestList.jsx";
 
@@ -58,23 +58,18 @@ const AdminPage = () => {
             </button>
             <button
               onClick={() => setActiveTab("chat")}
-              className={`text-left p-2 rounded ${
-                activeTab === "chat"
-                         }`}
+              className={`text-left p-2 rounded ${activeTab === "chat"}`}
             >
               채팅
             </button>
-            
+
             <button
               onClick={() => setActiveTab("delivery")}
-              className={`text-left p-2 rounded ${
-                activeTab === "delivery"
-                  ? "bg-black text-white"
-                  : "hover:bg-gray-200"
-
+              className={`text-left p-2 rounded ${activeTab === "delivery"}`}
+            >
               배송 관리
             </button>
-                
+
             <button
               onClick={() => setActiveTab("requests")}
               className={`text-left p-2 rounded ${
@@ -85,7 +80,6 @@ const AdminPage = () => {
             >
               교환/환불 요청 관리
             </button>
-
           </nav>
         </aside>
 
@@ -98,8 +92,6 @@ const AdminPage = () => {
           {activeTab === "requests" && <AdminRequestList />}
         </main>
       </div>
-
-      
     </MainLayout>
   );
 };
