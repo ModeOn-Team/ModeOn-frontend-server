@@ -1,12 +1,12 @@
 import { useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
 // 각 탭에 들어갈 컴포넌트 (아직 구현 전)
-// import Cart from "../components/mypage/Cart";
+import CartPage from "./CartPage";
 import Wishlist from "../components/mypage/Wishlist";
 // import Points from "../components/mypage/Points";
 // import Membership from "../components/mypage/Membership";
 // import Coupons from "../components/mypage/Coupons";
-// import Orders from "../components/mypage/Orders";
+import HistoryPage from "./HistoryPage";
 // import Reviews from "../components/mypage/Reviews";
 
 const MyPage = () => {
@@ -47,13 +47,14 @@ const MyPage = () => {
 
         {/* 메인 콘텐츠 */}
         <main className="flex-1 p-10">
-          {/* {activeTab === "cart" && <Cart />} */}
+          {activeTab === "cart" && <CartPage />}
           {activeTab === "wishlist" && <Wishlist />}
-          {/* {activeTab === "points" && <Points />}
-          {activeTab === "membership" && <Membership />}
-          {activeTab === "coupons" && <Coupons />}
-          {activeTab === "orders" && <Orders />}
-          {activeTab === "reviews" && <Reviews />} */}
+          {/* {activeTab === "points" && <Points />} */}
+          {/* {activeTab === "membership" && <Membership />} */}
+          {/* {activeTab === "coupons" && <Coupons />} */}
+          {activeTab === "orders" && <HistoryPage />}
+          {activeTab === "ordersDetail" && <HistoryDetailPage />}
+          {/* {activeTab === "reviews" && <Reviews />} */}
         </main>
       </div>
     </MainLayout>

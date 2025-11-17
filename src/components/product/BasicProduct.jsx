@@ -43,7 +43,6 @@ const Product = () => {
         setKidsProducts(
           kids.content?.filter((p) => p.variants?.length > 0) || []
         );
-        console.log(all);
       } catch (err) {
         console.error("Failed to load products:", err);
       }

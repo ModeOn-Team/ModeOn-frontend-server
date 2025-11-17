@@ -17,9 +17,6 @@ import MembershipLevelPage from "./pages/MembershipLevelPage.jsx"; // 멤버십 
 import CouponPage from "./pages/CouponPage.jsx"; // 쿠폰 페이지
 import PointPage from "./pages/PointPage.jsx"; // 포인트 페이지
 import ReviewPage from "./pages/ReviewPage.jsx"; // 리뷰 페이지
-import CartPage from "./pages/CartPage";
-import Success from "./pages/Success";
-import Fail from "./pages/Fail";
 import HistoryPage from "./pages/HistoryPage";
 import HistoryDetail from "./pages/HistoryDetail";
 
@@ -139,7 +136,7 @@ export default function App() {
         <Route
           path="/mypage"
           element={
-            isAuthenticated ? <MyPage /> : <Navigate to="/auth" replace />
+            isAuthenticated ? <Mypage /> : <Navigate to="/auth" replace />
           }
         />
         <Route

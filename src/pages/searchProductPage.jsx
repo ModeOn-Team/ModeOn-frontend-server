@@ -20,7 +20,6 @@ const SearchProductPage = () => {
   }, [location.search]);
 
   useEffect(() => {
-    console.log(search);
     if (search === undefined) return;
     ProductSearch({ word:search, page }, page > 0);
   }, [search, page]);

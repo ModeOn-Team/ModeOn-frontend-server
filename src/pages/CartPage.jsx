@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { cartService } from "../services/cartService";
 import { loadTossPayments } from "@tosspayments/payment-sdk";
-import MainLayout from "../components/layout/MainLayout";
 
 function CartPage() {
   const [cartItems, setCartItems] = useState([]);
@@ -54,18 +53,22 @@ function CartPage() {
     loadCart();
   };
 
-
   // 결제
   const handlePayment = async () => {
-    const selectedProducts = cartItems.filter((item) => selectedItems.includes(item.id));
-    if (selectedProducts.length === 0) return alert("결제할 상품을 선택하세요.");
+    const selectedProducts = cartItems.filter((item) =>
+      selectedItems.includes(item.id)
+    );
+    if (selectedProducts.length === 0)
+      return alert("결제할 상품을 선택하세요.");
 
     const totalAmount = selectedProducts.reduce(
       (sum, item) => sum + item.productPrice * item.count,
       0
     );
 
-    const tossPayments = await loadTossPayments(import.meta.env.VITE_TOSS_CLIENT_KEY);
+    const tossPayments = await loadTossPayments(
+      import.meta.env.VITE_TOSS_CLIENT_KEY
+    );
     const orderId = "order_" + Date.now();
 
     await tossPayments.requestPayment("카드", {
@@ -82,105 +85,109 @@ function CartPage() {
     .filter((item) => selectedItems.includes(item.id))
     .reduce((sum, item) => sum + item.productPrice * item.count, 0);
 
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
   return (
-    <MainLayout>
-      <div className="max-w-screen-xl mx-auto py-10 space-y-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold">장바구니</h1>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleSelectAll}
-              className="text-sm border px-3 py-1 rounded-md hover:bg-gray-100"
-            >
-              {selectAll ? "전체 해제" : "전체 선택"}
-            </button>
-            <button
-              onClick={handleRemoveSelected}
-              disabled={selectedItems.length === 0}
-              className="text-sm border px-3 py-1 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
-            >
-              선택 삭제
-            </button>
-          </div>
+    <div className="max-w-screen-xl mx-auto py-10 space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">장바구니</h1>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleSelectAll}
+            className="text-sm border px-3 py-1 rounded-md hover:bg-gray-100"
+          >
+            {selectAll ? "전체 해제" : "전체 선택"}
+          </button>
+          <button
+            onClick={handleRemoveSelected}
+            disabled={selectedItems.length === 0}
+            className="text-sm border px-3 py-1 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+          >
+            선택 삭제
+          </button>
         </div>
-
-        {cartItems.length === 0 ? (
-          <div className="text-center text-gray-500 py-24">
-            장바구니가 비어 있습니다 🛒
-          </div>
-        ) : (
-          <>
-            <div className="flex flex-col bg-white rounded-2xl shadow-sm divide-y">
-              {cartItems.map((item) => (
-                <div key={item.id} className="flex items-center gap-6 p-4">
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.includes(item.id)}
-                    onChange={() => handleSelectItem(item.id)}
-                    className="w-4 h-4"
-                  />
-
-                  <img
-                    src={item.productImage || "https://cdn-icons-png.flaticon.com/512/7596/7596292.png"}
-                    alt={item.productName}
-                    className="w-24 h-24 object-cover rounded-lg border"
-                  />
-
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium truncate">{item.productName}</h3>
-                    <p className="text-gray-500 mt-1">
-                      {item.productPrice.toLocaleString()}원
-                    </p>
-
-                    <div className="flex items-center gap-2 mt-3">
-                      <button
-                        onClick={() => handleCountChange(item, -1)}
-                        className="w-8 h-8 border rounded-md"
-                      >
-                        -
-                      </button>
-                      <span className="w-8 text-center">{item.count}</span>
-                      <button
-                        onClick={() => handleCountChange(item, +1)}
-                        className="w-8 h-8 border rounded-md"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <div className="text-sm text-gray-500">합계</div>
-                    <div className="text-lg font-semibold">
-                      {(item.productPrice * item.count).toLocaleString()}원
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center justify-between pt-4">
-              <div className="text-gray-600">
-                선택된 상품 <span className="font-medium">{selectedItems.length}</span>개
-              </div>
-
-              <div className="flex items-center gap-6">
-                <div className="text-xl font-semibold">
-                  {totalPrice.toLocaleString()}원
-                </div>
-                <button
-                  onClick={handlePayment}
-                  disabled={selectedItems.length === 0}
-                  className="bg-black text-white px-6 py-3 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  결제하기
-                </button>
-              </div>
-            </div>
-          </>
-        )}
       </div>
-    </MainLayout>
+
+      {cartItems.length === 0 ? (
+        <div className="text-center text-gray-500 py-24">
+          장바구니가 비어 있습니다 🛒
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-col bg-white rounded-2xl shadow-sm divide-y">
+            {cartItems.map((item) => (
+              <div key={item.id} className="flex items-center gap-6 p-4">
+                <input
+                  type="checkbox"
+                  checked={selectedItems.includes(item.id)}
+                  onChange={() => handleSelectItem(item.id)}
+                  className="w-4 h-4"
+                />
+
+                <img
+                  src={
+                    API_URL + item.productImage ||
+                    "https://cdn-icons-png.flaticon.com/512/7596/7596292.png"
+                  }
+                  alt={item.productName}
+                  className="w-24 h-24 object-cover rounded-lg border"
+                />
+
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium truncate">{item.productName} -</h3>
+                  <p className="text-gray-500 mt-1">
+                    {item.productPrice.toLocaleString()}원
+                  </p>
+
+                  <div className="flex items-center gap-2 mt-3">
+                    <button
+                      onClick={() => handleCountChange(item, -1)}
+                      className="w-8 h-8 border rounded-md"
+                    >
+                      -
+                    </button>
+                    <span className="w-8 text-center">{item.count}</span>
+                    <button
+                      onClick={() => handleCountChange(item, +1)}
+                      className="w-8 h-8 border rounded-md"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <div className="text-sm text-gray-500">합계</div>
+                  <div className="text-lg font-semibold">
+                    {(item.productPrice * item.count).toLocaleString()}원
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between pt-4">
+            <div className="text-gray-600">
+              선택된 상품{" "}
+              <span className="font-medium">{selectedItems.length}</span>개
+            </div>
+
+            <div className="flex items-center gap-6">
+              <div className="text-xl font-semibold">
+                {totalPrice.toLocaleString()}원
+              </div>
+              <button
+                onClick={handlePayment}
+                disabled={selectedItems.length === 0}
+                className="bg-black text-white px-6 py-3 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                결제하기
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 

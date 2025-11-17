@@ -8,7 +8,6 @@ const SearchBar = ({ placeholder = "검색어를 입력하세요", onSearch }) =
   const handleSubmit = (e) => {
     e.preventDefault();
     navigate("/search?word=" + keyword);
-    console.log(keyword);
     if (onSearch) onSearch(keyword.trim());
   };
 

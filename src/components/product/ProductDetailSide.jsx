@@ -55,7 +55,7 @@ const ProductDetailSide = ({
     );
   };
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (selectedOptions) => {
     if (selectedOptions.length === 0) {
       alert("옵션을 선택해주세요.");
       return;
@@ -70,7 +70,7 @@ const ProductDetailSide = ({
       alert("장바구니 담기 실패!");
     }
   };
-  
+
   const toggleWishList = async (e) => {
     e.stopPropagation();
     try {
@@ -156,23 +156,6 @@ const ProductDetailSide = ({
         </div>
       )}
 
-<div className="flex flex-row gap-4 mt-3">
-  <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
-    찜
-  </button>
-
-  <button
-    onClick={handleAddToCart}
-    className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition"
-  >
-    장바구니
-  </button>
-
-  <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
-    구매하기
-  </button>
-</div>
-
       <div className="flex flex-row gap-4 mt-3">
         <div className="flex items-center">
           <span
@@ -184,7 +167,7 @@ const ProductDetailSide = ({
             {isWish ? "favorite" : "favorite_border"}
           </span>
         </div>
-        <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
+        <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition" onClick={()=> handleAddToCart(selectedOptions)}>
           장바구니
         </button>
         <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
@@ -201,12 +184,7 @@ const ProductDetailSide = ({
 
       <p className="font-semibold mb-2 mt-4">이 상품을 활용한 사진 후기</p>
       <div className="text-gray-400 text-sm">아직 등록된 후기가 없습니다.</div>
-      
-
-      
     </>
-
-    
   );
 };
 
