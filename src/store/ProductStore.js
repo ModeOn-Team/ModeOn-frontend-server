@@ -16,9 +16,12 @@ const useProductStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       const data = await ProductService.getAllProducts(page);
+
       set((state) => ({
         products: append ? [...state.products, ...data.content] : data.content,
         loading: false,
+        totalPages: data.totalPages,
+        last: data.last,
       }));
     } catch (err) {
       set({
@@ -29,10 +32,10 @@ const useProductStore = create((set) => ({
     }
   },
 
-  fetchProductById: async (ProductId) => {
+  fetchProductById: async (productId) => {
     set({ loading: true, error: null });
     try {
-      const data = await ProductService.getProductById(ProductId);
+      const data = await ProductService.getProductById(productId);
       set({ selectedProduct: data, loading: false });
     } catch (err) {
       set({

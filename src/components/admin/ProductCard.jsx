@@ -8,7 +8,7 @@ const ProductCard = ({ product, ProductDelete, onRefresh }) => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
   const mainImage =
     detailImages && detailImages.length > 0
-      ? API_URL + "/" + detailImages[0]
+      ? API_URL + detailImages[0]
       : API_URL + "/images/no-image.png";
   const categories =
     product.category?.largeCategory +
@@ -27,7 +27,7 @@ const ProductCard = ({ product, ProductDelete, onRefresh }) => {
       if (onRefresh) await onRefresh();
     } catch (error) {
       console.error(error);
-      alert("재고 변경 중 오류가 발생했습니다.");
+      alert("상품 삭제 중 오류가 발생했습니다.");
     }
   };
 
