@@ -3,7 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout.jsx";
 import { getUserCoupons, issueCoupon } from "../services/coupon.js";
-import { getUserMembership } from "../services/membership.js";
+import { MembershipService } from "../services/membership.js";
+
 
 function CouponPage() {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ function CouponPage() {
       setError(null);
       try {
         const [membershipData, couponData] = await Promise.all([
-          getUserMembership(),
+          MembershipService.getUserMembership(),
           getUserCoupons(),
         ]);
 

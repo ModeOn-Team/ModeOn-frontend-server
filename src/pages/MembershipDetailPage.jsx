@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { getUserMembership } from "../services/user.js";
+import { MembershipService } from "../services/membership.js";
 import MainLayout from "../components/layout/MainLayout.jsx";
 
 function MembershipDetailPage() {
@@ -9,7 +9,6 @@ function MembershipDetailPage() {
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const TEST_USER_ID = 1;
 
   // 미리보기 모드 감지
   const previewLevel = searchParams.get("preview"); // ?preview=VIP
@@ -19,7 +18,7 @@ function MembershipDetailPage() {
   useEffect(() => {
     const fetchMembership = async () => {
       try {
-        const data = await getUserMembership(TEST_USER_ID);
+        const data = await MembershipService.getUserMembership();
         setUserInfo(data);
       } catch (err) {
         console.error("멤버십 정보 로드 실패:", err);
