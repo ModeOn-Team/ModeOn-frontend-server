@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ChatHeader from "../components/chat/ChatHeader";
 import ChatMessageList from "../components/chat/ChatMessageList";
 import ChatInput from "../components/chat/ChatInput";
 import useChatSocket from "../hooks/useChatSocket";
 import useChatStore from "../store/chatStore";
-import { getChatMessages, getAdminChatList } from "../services/chatApi";
+import { getChatMessages, getAdminChatList, validateChatRoomAccess } from "../services/chatApi";
 import StorageService from "../services/storage";
 
 // 1:1 채팅 상세 페이지
 // 실시간 메시지 송수신 및 WebSocket 연결 관리
 const ChatRoomPage = () => {
   const { roomId } = useParams();
+  const navigate = useNavigate();
   const {
     setCurrentRoomId,
     isConnected,
@@ -28,12 +29,59 @@ const ChatRoomPage = () => {
   const [initialLoad, setInitialLoad] = useState(false);
   const [otherUser, setOtherUser] = useState(null);
   const [roomInfo, setRoomInfo] = useState(null);
+  const [accessDenied, setAccessDenied] = useState(false);
+  const [isValidating, setIsValidating] = useState(true);
   const currentUser = StorageService.getUser();
   const isAdmin = currentUser?.role === "ROLE_ADMIN";
 
+  // 채팅방 접근 권한 검증
+  useEffect(() => {
+    const validateAccess = async () => {
+      if (!roomId) {
+        setIsValidating(false);
+        setAccessDenied(true);
+        return;
+      }
+
+      const numericRoomId = Number(roomId);
+      if (isNaN(numericRoomId)) {
+        setIsValidating(false);
+        setAccessDenied(true);
+        return;
+      }
+
+      try {
+        const hasAccess = await validateChatRoomAccess(numericRoomId);
+        if (!hasAccess) {
+          setAccessDenied(true);
+          setIsValidating(false);
+          // 3초 후 채팅 목록으로 리다이렉트
+          setTimeout(() => {
+            navigate("/chat", { replace: true });
+          }, 3000);
+          return;
+        }
+        setIsValidating(false);
+      } catch (error) {
+        console.error("채팅방 접근 권한 검증 실패:", error);
+        if (error.response?.status === 403 || error.response?.status === 404) {
+          setAccessDenied(true);
+          setIsValidating(false);
+          setTimeout(() => {
+            navigate("/chat", { replace: true });
+          }, 3000);
+        } else {
+          setIsValidating(false);
+        }
+      }
+    };
+
+    validateAccess();
+  }, [roomId, navigate]);
+
   // 초기 메시지 로드
   useEffect(() => {
-    if (roomId && !initialLoad) {
+    if (roomId && !initialLoad && !accessDenied && !isValidating) {
       const loadMessages = async () => {
         try {
           setLoading(true);
@@ -115,6 +163,28 @@ const ChatRoomPage = () => {
           setInitialLoad(true);
         } catch (error) {
           console.error("메시지 로드 실패:", error);
+          
+          // 403 Forbidden: 접근 권한 없음
+          if (error.response?.status === 403) {
+            const errorMessage = error.response?.data?.message || "해당 채팅방의 메시지를 조회할 권한이 없습니다.";
+            useChatStore.getState().setError(errorMessage);
+            setAccessDenied(true);
+            setTimeout(() => {
+              navigate("/chat", { replace: true });
+            }, 3000);
+          } 
+          // 404 Not Found: 채팅방 없음
+          else if (error.response?.status === 404) {
+            setAccessDenied(true);
+            setTimeout(() => {
+              navigate("/chat", { replace: true });
+            }, 3000);
+          }
+          // 기타 에러
+          else {
+            const errorMessage = error.response?.data?.message || "메시지를 불러오는데 실패했습니다.";
+            useChatStore.getState().setError(errorMessage);
+          }
         } finally {
           setLoading(false);
         }
@@ -122,7 +192,7 @@ const ChatRoomPage = () => {
 
       loadMessages();
     }
-  }, [roomId, initialLoad, setMessages, setLoading]);
+  }, [roomId, initialLoad, setMessages, setLoading, accessDenied, isValidating, navigate]);
 
   useEffect(() => {
     if (roomId) {
@@ -207,6 +277,35 @@ const ChatRoomPage = () => {
       loadChatRoomInfo();
     }
   }, [roomId, isAdmin]);
+
+  // 접근 권한 검증 중
+  if (isValidating) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-gray-500 mb-2">접근 권한 확인 중...</p>
+          <p className="text-sm text-gray-400">채팅방 정보를 확인하고 있습니다.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 접근 거부
+  if (accessDenied) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-red-500 mb-2 font-semibold">접근 권한이 없습니다</p>
+          <p className="text-sm text-gray-600 mb-4">
+            이 채팅방에 접근할 권한이 없습니다.
+          </p>
+          <p className="text-xs text-gray-400">
+            3초 후 채팅 목록으로 이동합니다...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // WebSocket 연결 상태 확인
   if (validRoomId && !isConnected && !loading) {

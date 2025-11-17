@@ -12,6 +12,7 @@ import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import CartPage from "./pages/CartPage";
 import Success from "./pages/Success";
 import Fail from "./pages/Fail";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
@@ -37,7 +38,9 @@ export default function App() {
         <Route
           path="/chat/:roomId"
           element={
-            isAuthenticated ? <ChatRoomPage /> : <Navigate to="/auth" replace />
+            <ProtectedRoute>
+              <ChatRoomPage />
+            </ProtectedRoute>
           }
         />
         <Route

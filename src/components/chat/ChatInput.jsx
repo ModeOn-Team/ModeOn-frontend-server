@@ -31,25 +31,25 @@ const ChatInput = ({ roomId, sendTypingStatus }) => {
   );
 
   const currentUser = StorageService.getUser();
+  const isAdmin = currentUser?.role === "ROLE_ADMIN";
 
   // 텍스트 메시지 전송
-  // STOMP로 전송하거나 REST API로 전송
-  // UI 확인을 위해 로그인 체크 완화
+  // 백엔드 인증/인가 강화에 따라 실제 사용자 ID만 사용
   const handleSendText = async () => {
     if (!message.trim() || !roomId) return;
 
-    // roomId가 유효한 숫자인지 확인 (문자열로 들어올 수 있음)
-    const numericRoomId = Number(roomId);
-    if (isNaN(numericRoomId) || numericRoomId <= 0) {
-      console.warn("유효하지 않은 roomId:", roomId, "- 숫자여야 합니다.");
+    // 로그인 확인
+    if (!currentUser?.id) {
+      alert("로그인이 필요합니다. 메시지를 전송할 수 없습니다.");
       return;
     }
 
-    // userId 확인 (UI 확인용으로 경고만 출력)
-    if (!currentUser?.id) {
-      console.warn("사용자 정보가 없습니다. 메시지 전송은 로그인 후 가능합니다.");
-      // UI 확인을 위해 메시지 전송은 막지 않음
-      // return;
+    // roomId가 유효한 숫자인지 확인
+    const numericRoomId = Number(roomId);
+    if (isNaN(numericRoomId) || numericRoomId <= 0) {
+      console.warn("유효하지 않은 roomId:", roomId);
+      alert("유효하지 않은 채팅방입니다.");
+      return;
     }
 
     const trimmedMessage = message.trim();
@@ -59,34 +59,39 @@ const ChatInput = ({ roomId, sendTypingStatus }) => {
     try {
       setLoading(true);
 
-      // UI 확인용: 로그인하지 않은 경우 더미 userId 사용
-      const userId = currentUser?.id || 999; // 임시 더미 ID
+      // 백엔드 인증/인가 강화: 실제 로그인한 사용자 ID만 사용
+      // 관리자인 경우 sender: "ADMIN", adminId 설정
+      // 일반 사용자인 경우 sender: "USER", userId 설정
+      const response = await sendTextMessage({
+        roomId: numericRoomId,
+        sender: isAdmin ? "ADMIN" : "USER",
+        message: trimmedMessage,
+        messageType: "TEXT",
+        metadata: null,
+        userId: isAdmin ? null : currentUser.id, // 일반 사용자만 userId 설정
+        adminId: isAdmin ? currentUser.id : null, // 관리자만 adminId 설정
+      });
 
-      // REST API로 전송 (백엔드에서 Redis로 브로드캐스트함)
-      // 백엔드 ChatMessageDto 형식: { roomId, sender, message, messageType, metadata, userId, adminId }
-      try {
-        const response = await sendTextMessage({
-          roomId: numericRoomId,
-          sender: "USER",
-          message: trimmedMessage, // 백엔드는 'message' 필드를 사용
-          messageType: "TEXT",
-          metadata: null,
-          userId: userId,
-          adminId: null,
-        });
-        // 전송 성공
-      } catch (error) {
-        // 401 에러 등으로 전송 실패해도 UI 확인을 위해 계속 진행
-        console.warn("메시지 전송 실패 (UI 확인용으로 계속 진행):", error.response?.data || error.message);
-      }
-
-      // WebSocket(STOMP)을 통해 자동으로 수신되므로 여기서는 추가하지 않음
+      // 전송 성공
     } catch (error) {
       console.error("메시지 전송 실패:", error);
-      // 에러 상세 정보 출력
-      if (error.response) {
-        console.error("백엔드 응답:", error.response.data);
+      
+      // 403 Forbidden 에러 처리
+      if (error.response?.status === 403) {
+        const errorMessage = error.response?.data?.message || "메시지를 전송할 권한이 없습니다.";
+        alert(errorMessage);
+        return;
       }
+      
+      // 400 Bad Request 에러 처리
+      if (error.response?.status === 400) {
+        const errorMessage = error.response?.data?.message || "잘못된 요청입니다.";
+        alert(errorMessage);
+        return;
+      }
+      
+      // 기타 에러
+      alert(error.response?.data?.message || "메시지 전송에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setLoading(false);
     }
@@ -121,6 +126,11 @@ const ChatInput = ({ roomId, sendTypingStatus }) => {
   const handleSendImage = async (file, caption = "") => {
     if (!file || !roomId) return;
 
+    if (!currentUser?.id) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
     try {
       setLoading(true);
       
@@ -128,7 +138,7 @@ const ChatInput = ({ roomId, sendTypingStatus }) => {
       // 현재는 더미 URL 사용
       const imageUrl = URL.createObjectURL(file);
       
-      // 백엔드 ChatMessageDto 형식으로 전송
+      // 백엔드 인증/인가 강화: 실제 사용자 ID만 사용
       const response = await sendImageMessage({
         roomId: Number(roomId),
         imageUrl: imageUrl, // 실제로는 업로드 후 받은 URL
@@ -137,7 +147,9 @@ const ChatInput = ({ roomId, sendTypingStatus }) => {
           fileSize: file.size,
           fileType: file.type,
         }),
-        userId: currentUser?.id,
+        sender: isAdmin ? "ADMIN" : "USER",
+        userId: isAdmin ? null : currentUser.id,
+        adminId: isAdmin ? currentUser.id : null,
       });
 
       // WebSocket을 통해 자동으로 수신됨
@@ -145,6 +157,14 @@ const ChatInput = ({ roomId, sendTypingStatus }) => {
       setPreviewType(null);
     } catch (error) {
       console.error("이미지 전송 실패:", error);
+      
+      if (error.response?.status === 403) {
+        alert(error.response?.data?.message || "이미지를 전송할 권한이 없습니다.");
+      } else if (error.response?.status === 400) {
+        alert(error.response?.data?.message || "잘못된 요청입니다.");
+      } else {
+        alert("이미지 전송에 실패했습니다. 다시 시도해주세요.");
+      }
     } finally {
       setLoading(false);
     }
@@ -155,6 +175,11 @@ const ChatInput = ({ roomId, sendTypingStatus }) => {
   const handleSendFile = async (file, caption = "") => {
     if (!file || !roomId) return;
 
+    if (!currentUser?.id) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
     try {
       setLoading(true);
       
@@ -162,7 +187,7 @@ const ChatInput = ({ roomId, sendTypingStatus }) => {
       // 현재는 더미 URL 사용
       const fileUrl = URL.createObjectURL(file);
       
-      // 백엔드 ChatMessageDto 형식으로 전송
+      // 백엔드 인증/인가 강화: 실제 사용자 ID만 사용
       const response = await sendFileMessage({
         roomId: Number(roomId),
         fileUrl: fileUrl, // 실제로는 업로드 후 받은 URL
@@ -171,7 +196,9 @@ const ChatInput = ({ roomId, sendTypingStatus }) => {
           fileSize: file.size,
           fileType: file.type,
         }),
-        userId: currentUser?.id,
+        sender: isAdmin ? "ADMIN" : "USER",
+        userId: isAdmin ? null : currentUser.id,
+        adminId: isAdmin ? currentUser.id : null,
       });
 
       // WebSocket을 통해 자동으로 수신됨
@@ -179,6 +206,14 @@ const ChatInput = ({ roomId, sendTypingStatus }) => {
       setPreviewType(null);
     } catch (error) {
       console.error("파일 전송 실패:", error);
+      
+      if (error.response?.status === 403) {
+        alert(error.response?.data?.message || "파일을 전송할 권한이 없습니다.");
+      } else if (error.response?.status === 400) {
+        alert(error.response?.data?.message || "잘못된 요청입니다.");
+      } else {
+        alert("파일 전송에 실패했습니다. 다시 시도해주세요.");
+      }
     } finally {
       setLoading(false);
     }

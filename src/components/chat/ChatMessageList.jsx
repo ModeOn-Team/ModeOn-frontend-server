@@ -55,6 +55,16 @@ const ChatMessageList = ({ roomId }) => {
       } catch (error) {
         console.error("버튼 메타데이터 파싱 실패:", error);
       }
+      
+      // 기본 버튼이 없으면 기본 4가지 선택지 제공
+      if (buttons.length === 0) {
+        buttons = [
+          "입고 및 배송 문의",
+          "배송전 변경 및 취소",
+          "교환/반품",
+          "입금확인"
+        ];
+      }
 
       return (
         <div key={message.id} className="flex justify-start mb-4">
