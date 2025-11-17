@@ -5,6 +5,7 @@ const ProductForm = ({ isOpen, onClose, categories }) => {
   if (!isOpen) return null;
 
   const { ProductCreate, ProductImage } = useAdminStore();
+
   const [productName, setProductName] = useState("");
   const [price, setPrice] = useState("");
   const [gender, setGender] = useState("");
@@ -25,10 +26,12 @@ const ProductForm = ({ isOpen, onClose, categories }) => {
   );
 
   const handleAddImage = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setImages([...images, URL.createObjectURL(file)]);
-    setImageFiles([...imageFiles, file]);
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    const newImages = files.map((file) => URL.createObjectURL(file));
+    setImages([...images, ...newImages]);
+    setImageFiles([...imageFiles, ...files]);
   };
 
   const renderDepthColumn = (depthCategories, selectedId, setSelected) => (
@@ -53,7 +56,7 @@ const ProductForm = ({ isOpen, onClose, categories }) => {
   );
 
   const handleSaveProduct = async () => {
-    let categoryId = selectedDepth2 ?? selectedDepth1 ?? selectedDepth0;
+    const categoryId = selectedDepth2 ?? selectedDepth1 ?? selectedDepth0;
 
     if (!categoryId) {
       alert("카테고리를 선택해주세요.");
@@ -69,7 +72,6 @@ const ProductForm = ({ isOpen, onClose, categories }) => {
 
     try {
       const res = await ProductCreate(product);
-
       const productId = res.id;
 
       if (imageFiles.length > 0) {
@@ -79,9 +81,10 @@ const ProductForm = ({ isOpen, onClose, categories }) => {
         await ProductImage(formData);
       }
 
-      onClose(); 
+      onClose();
     } catch (err) {
       console.error("에러 발생:", err);
+      alert("상품 생성 중 오류가 발생했습니다.");
     }
   };
 
@@ -133,16 +136,12 @@ const ProductForm = ({ isOpen, onClose, categories }) => {
               setSelectedDepth1(id);
               setSelectedDepth2(null);
             })}
-            {renderDepthColumn(
-              depth2Categories,
-              selectedDepth2,
-              setSelectedDepth2
-            )}
+            {renderDepthColumn(depth2Categories, selectedDepth2, setSelectedDepth2)}
           </div>
 
           <div className="flex flex-col gap-2 mt-4">
             <label className="font-medium">Images</label>
-            <div className="text-sm font-medium">first image is Thumbnail</div>
+            <div className="text-sm font-medium">First image is Thumbnail</div>
             <div className="flex gap-2 flex-wrap">
               {images.length > 0 && (
                 <div>
@@ -168,6 +167,7 @@ const ProductForm = ({ isOpen, onClose, categories }) => {
                 <input
                   type="file"
                   accept="image/*"
+                  multiple
                   onChange={handleAddImage}
                   className="hidden"
                 />

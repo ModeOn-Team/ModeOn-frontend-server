@@ -41,7 +41,6 @@ const Login = ({ onSwitch }) => {
         err.response.status === 403 &&
         err.response.data.message === "계정 활성화가 필요합니다."
       ) {
-        console.log("switch to emailVerification");
         onSwitch("emailVerification");
       } else {
         setError(

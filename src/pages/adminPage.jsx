@@ -3,8 +3,10 @@ import { useSearchParams } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
 import Category from "../components/admin/Category";
 import Product from "../components/admin/Product";
-import Stock from "../components/admin/Stock";
 import AdminChatListPage from "./AdminChatListPage";
+import Stock from "../components/admin/Stock"
+import Delivery from "../components/admin/Delivery";
+import AdminRequestList from "../components/admin/AdminRequestList.jsx";
 
 const AdminPage = () => {
   const [searchParams] = useSearchParams();
@@ -58,12 +60,32 @@ const AdminPage = () => {
               onClick={() => setActiveTab("chat")}
               className={`text-left p-2 rounded ${
                 activeTab === "chat"
+                         }`}
+            >
+              채팅
+            </button>
+            
+            <button
+              onClick={() => setActiveTab("delivery")}
+              className={`text-left p-2 rounded ${
+                activeTab === "delivery"
+                  ? "bg-black text-white"
+                  : "hover:bg-gray-200"
+
+              배송 관리
+            </button>
+                
+            <button
+              onClick={() => setActiveTab("requests")}
+              className={`text-left p-2 rounded ${
+                activeTab === "requests"
                   ? "bg-black text-white"
                   : "hover:bg-gray-200"
               }`}
             >
-              채팅
+              교환/환불 요청 관리
             </button>
+
           </nav>
         </aside>
 
@@ -72,8 +94,12 @@ const AdminPage = () => {
           {activeTab === "product" && <Product />}
           {activeTab === "stock" && <Stock />}
           {activeTab === "chat" && <AdminChatListPage />}
+          {activeTab === "delivery" && <Delivery />}
+          {activeTab === "requests" && <AdminRequestList />}
         </main>
       </div>
+
+      
     </MainLayout>
   );
 };

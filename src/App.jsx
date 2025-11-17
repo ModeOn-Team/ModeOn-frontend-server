@@ -9,12 +9,32 @@ import useAuthStore from "./store/authStore.js";
 import AdminPage from "./pages/adminPage.jsx";
 import ProductPage from "./pages/ProductPage.jsx";
 import ProductDetailPage from "./pages/ProductDetailPage.jsx";
+import CartPage from "./pages/CartPage.jsx";
+import Success from "./pages/Success.jsx";
+import Fail from "./pages/Fail.jsx";
+import MembershipDetailPage from "./pages/MembershipDetailPage.jsx"; // 멤버십
+import MembershipLevelPage from "./pages/MembershipLevelPage.jsx"; // 멤버십 등급
+import CouponPage from "./pages/CouponPage.jsx"; // 쿠폰 페이지
+import PointPage from "./pages/PointPage.jsx"; // 포인트 페이지
+import ReviewPage from "./pages/ReviewPage.jsx"; // 리뷰 페이지
 import CartPage from "./pages/CartPage";
 import Success from "./pages/Success";
 import Fail from "./pages/Fail";
+import HistoryPage from "./pages/HistoryPage";
+import HistoryDetail from "./pages/HistoryDetail";
+
+import ReviewWrite from "./pages/ReviewWrite";
+import ReviewDetail from "./pages/ReviewDetail";
+import ReviewEdit from "./pages/ReviewEdit";
+import RequestPage from "./pages/RequestPage";
+
+import Mypage from "./pages/myPage";
+import SearchProductPage from "./pages/searchProductPage.jsx";
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
+
+  const adminPageUrl = "/admin"; // 관리자 페이지 URL 하드코딩
 
   return (
     <BrowserRouter>
@@ -23,11 +43,14 @@ export default function App() {
           path="/"
           element={isAuthenticated ? <Home /> : <Navigate to="/auth" replace />}
         />
+
         <Route path="/oauth2/callback" element={<OAuth2Callback />} />
+
         <Route
           path="/auth"
           element={isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />}
         />
+
         <Route
           path="/chat"
           element={
@@ -50,25 +73,108 @@ export default function App() {
             )
           }
         />
+
         <Route
           path={import.meta.env.VITE_ADMIN_PAGE_URL || "/admin"}
           element={
-            isAuthenticated ? <AdminPage /> : <Navigate to="/" replace />
+            isAuthenticated ? <AdminPage /> : <Navigate to="/auth" replace />
           }
         />
+
         <Route
           path="/product"
           element={
-            isAuthenticated ? <ProductPage /> : <Navigate to="/" replace />
+            isAuthenticated ? <ProductPage /> : <Navigate to="/auth" replace />
           }
+        />
+        <Route
+          path="/search"
+          element={
+            isAuthenticated ? (
+              <SearchProductPage />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/mypage"
+          element={isAuthenticated ? <Mypage /> : <Navigate to="/" replace />}
         />
         <Route path="/product/:id" element={<ProductDetailPage />} />
 
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/success" element={<Success />} />
+        <Route path="/fail" element={<Fail />} />
+
+        <Route
+          path="/orders"
+          element={isAuthenticated ? <HistoryPage /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/orders/:id"
+          element={isAuthenticated ? <HistoryDetail /> : <Navigate to="/auth" replace />}
+        />
+
+        <Route
+          path="/orders/:id/request"
+          element={isAuthenticated ? <RequestPage /> : <Navigate to="/auth" replace />}
+        />
+
+        <Route
+          path="/review/write/:historyId"
+          element={isAuthenticated ? <ReviewWrite /> : <Navigate to="/auth" replace />}
+        />
+
+        <Route
+          path="/review/:reviewId"
+          element={isAuthenticated ? <ReviewDetail /> : <Navigate to="/auth" replace />}
+        />
+
+        <Route
+          path="/review/edit/:reviewId"
+          element={isAuthenticated ? <ReviewEdit /> : <Navigate to="/auth" replace />}
+        />
+
+        <Route
+          path="/mypage"
+          element={
+            isAuthenticated ? <MyPage /> : <Navigate to="/auth" replace />
+          }
+        />
+        <Route
+          path="/mypage/membership"
+          element={
+            isAuthenticated ? (
+              <MembershipDetailPage />
+            ) : (
+              <Navigate to="/auth" replace />
+            )
+          }
+        />
+        <Route
+          path="/mypage/membership/levels"
+          element={
+            isAuthenticated ? (
+              <MembershipLevelPage />
+            ) : (
+              <Navigate to="/auth" replace />
+            )
+          }
+        />
+        {/* 포인트 페이지 */}
+        <Route path="/mypage/point" element={<PointPage />} />
+        {/* 쿠폰 페이지 */}
+        <Route path="/mypage/coupon" element={<CouponPage />} />
         {/* 결제 관련 */}
         <Route path="/cart" element={<CartPage />} />
         <Route path="/success" element={<Success />} />
         <Route path="/fail" element={<Fail />} />
+        {/* 리뷰 관련 */}
+        <Route path="/mypage/point" element={<PointPage />} />
+        <Route path="/mypage/reviews" element={<ReviewPage />} />
       </Routes>
+
     </BrowserRouter>
   );
 }
