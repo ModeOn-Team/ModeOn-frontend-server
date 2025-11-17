@@ -2,12 +2,14 @@ import axios from "axios";
 import StorageService from "./storage";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const baseURL = `${API_URL}/api`;
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 api.interceptors.request.use(

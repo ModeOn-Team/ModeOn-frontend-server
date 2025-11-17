@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
 // 각 탭에 들어갈 컴포넌트 (아직 구현 전)
 // import Cart from "../components/mypage/Cart";
@@ -11,16 +12,25 @@ import Wishlist from "../components/mypage/Wishlist";
 
 const MyPage = () => {
   const [activeTab, setActiveTab] = useState("cart");
+  const navigate = useNavigate();
 
   const tabs = [
     { id: "cart", label: "장바구니" },
     { id: "wishlist", label: "찜 목록" },
     { id: "points", label: "누적 포인트" },
-    { id: "membership", label: "멤버십 등급" },
+    { id: "membership", label: "멤버십 등급", path: "/mypage/membership/1" },
     { id: "coupons", label: "쿠폰" },
     { id: "orders", label: "주문내역" },
     { id: "reviews", label: "내가 작성한 후기" },
   ];
+
+  const handleTabClick = (tab) => {
+    if (tab.path) {
+      navigate(tab.path); // 페이지 이동
+    } else {
+      setActiveTab(tab.id); // 내부 탭 전환
+    }
+  };
 
   return (
     <MainLayout>
@@ -32,7 +42,7 @@ const MyPage = () => {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabClick(tab)}
                 className={`text-left p-2 rounded-md transition ${
                   activeTab === tab.id
                     ? "bg-black text-white"
@@ -47,13 +57,9 @@ const MyPage = () => {
 
         {/* 메인 콘텐츠 */}
         <main className="flex-1 p-10">
-          {/* {activeTab === "cart" && <Cart />} */}
-          {activeTab === "wishlist" && <Wishlist />}
-          {/* {activeTab === "points" && <Points />}
-          {activeTab === "membership" && <Membership />}
-          {activeTab === "coupons" && <Coupons />}
-          {activeTab === "orders" && <Orders />}
-          {activeTab === "reviews" && <Reviews />} */}
+          {tabs.find((t) => t.id === activeTab)?.component || (
+            <div className="text-gray-500">선택된 탭의 내용을 표시합니다.</div>
+          )}
         </main>
       </div>
     </MainLayout>
