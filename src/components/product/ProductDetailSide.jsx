@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cartService } from "../../services/cartService";
-
+import { useNavigate } from "react-router-dom";
 import { wishListService } from "../../services/wishList";
 
 const ProductDetailSide = ({
@@ -14,6 +14,7 @@ const ProductDetailSide = ({
 }) => {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [isWish, setIsWish] = useState(wishList);
+  const navigate = useNavigate();
 
   const handleSelect = (e) => {
     const selectedId = e.target.value;
@@ -62,9 +63,16 @@ const ProductDetailSide = ({
     }
     try {
       for (const option of selectedOptions) {
-        await cartService.addItem(option.id, option.quantity);
+        await cartService.addItem({
+          productId: id,
+          count: option.quantity,
+          size: option.size,
+          color: option.color,
+        });
+        
       }
       alert("장바구니에 담겼습니다!");
+      navigate("/mypage?tab=cart"); 
     } catch (err) {
       console.error(err);
       alert("장바구니 담기 실패!");

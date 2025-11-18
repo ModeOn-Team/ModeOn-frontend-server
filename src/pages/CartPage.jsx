@@ -39,11 +39,11 @@ function CartPage() {
   // 수량 변경
   const handleCountChange = async (item, delta) => {
     const newCount = Math.max(item.count + delta, 1);
-    await cartService.updateCount(item.productId, newCount);
+    await cartService.updateCount(item.id, newCount);
     loadCart();
   };
 
-  //선택 삭제
+  // 선택 삭제
   const handleRemoveSelected = async () => {
     for (const cartItemId of selectedItems) {
       await cartService.removeItem(cartItemId);
@@ -134,7 +134,13 @@ function CartPage() {
                 />
 
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium truncate">{item.productName} -</h3>
+                  <h3 className="font-medium truncate">{item.productName}</h3>
+
+               
+                  <p className="text-sm text-gray-500">
+                    옵션: {item.size} / {item.color}
+                  </p>
+
                   <p className="text-gray-500 mt-1">
                     {item.productPrice.toLocaleString()}원
                   </p>
