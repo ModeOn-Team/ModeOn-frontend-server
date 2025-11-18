@@ -93,6 +93,39 @@ const ChatRoomPage = () => {
             return;
           }
           
+          // 일반 사용자인 경우: 이전 메시지 히스토리를 불러오지 않고 안내 메시지만 표시
+          if (!isAdmin) {
+            const initialMessageContent = `안녕하세요 모드온입니다 :)\n\n상담 운영시간\n월~금 : 9:00 ~ 18:00\n공휴일 휴무\n\n이 외 궁금하신 사항은 게시판에 남겨주시면 순차적으로 안내해드리겠습니다\n\n궁금한 사항을 선택해주세요`;
+            
+            const buttonMessage = {
+              id: `buttons-${roomId}-${Date.now()}`,
+              roomId: roomId,
+              senderId: null,
+              receiverId: null,
+              content: initialMessageContent,
+              messageType: "SYSTEM_BUTTONS",
+              timestamp: new Date(0).toISOString(), // 최상단에 고정
+              isRead: true,
+              sender: "ADMIN",
+              userId: null,
+              adminId: null,
+              metadata: JSON.stringify({
+                buttons: [
+                  "입고 및 배송 문의",
+                  "배송전 변경 및 취소",
+                  "교환/반품"
+                ]
+              }),
+            };
+            
+            // 안내 메시지만 설정 (이전 메시지 히스토리 불러오지 않음)
+            setMessages(roomId, [buttonMessage]);
+            setInitialLoad(true);
+            setLoading(false);
+            return;
+          }
+          
+          // 관리자인 경우: 기존처럼 모든 메시지 히스토리 불러오기
           const messageList = await getChatMessages(numericRoomId);
           
           // 백엔드 ChatMessageDto를 프론트엔드 형식으로 변환
@@ -122,42 +155,6 @@ const ChatRoomPage = () => {
               }),
             };
           });
-          
-          // SYSTEM_BUTTONS 타입의 안내사항 메시지가 있는지 확인
-          const hasSystemButtons = convertedMessages.some(
-            msg => msg.messageType === "SYSTEM_BUTTONS" || msg.messageType === "SYSTEM"
-          );
-          
-          // 안내사항 메시지가 없으면 항상 추가 (일반 사용자에게만 표시, 관리자가 보낸 메시지로 처리)
-          if (!hasSystemButtons && !isAdmin) {
-            // 메시지 목록에서 관리자 메시지를 찾아 adminId 추출
-            const adminMessage = convertedMessages.find(msg => msg.sender === "ADMIN" && msg.adminId);
-            const adminId = adminMessage?.adminId || roomInfo?.adminId || null;
-            
-            const buttonMessage = {
-              id: `buttons-${roomId}-${Date.now()}`,
-              roomId: roomId,
-              senderId: adminId,
-              receiverId: null,
-              content: `안녕하세요 모드온입니다 :)\n\n상담 운영시간\n월~금 : 9:00 ~ 18:00\n공휴일 휴무\n\n이 외 궁금하신 사항은 게시판에 남겨주시면 순차적으로 안내해드리겠습니다\n\n궁금한 사항을 선택해주세요`,
-              messageType: "SYSTEM_BUTTONS",
-              timestamp: new Date(0).toISOString(), // 최상단에 고정하기 위해 가장 오래된 시간 사용
-              isRead: true,
-              sender: "ADMIN", // 관리자가 보낸 메시지로 처리 (파란색, 오른쪽)
-              userId: null,
-              adminId: adminId, // 채팅방의 관리자 ID
-              metadata: JSON.stringify({
-                buttons: [
-                  "입고 및 배송 문의",
-                  "배송전 변경 및 취소",
-                  "교환/반품",
-                  "입금확인"
-                ]
-              }),
-            };
-            // 안내사항을 맨 앞에 추가
-            convertedMessages.unshift(buttonMessage);
-          }
           
           setMessages(roomId, convertedMessages);
           setInitialLoad(true);
@@ -192,7 +189,7 @@ const ChatRoomPage = () => {
 
       loadMessages();
     }
-  }, [roomId, initialLoad, setMessages, setLoading, accessDenied, isValidating, navigate]);
+  }, [roomId, initialLoad, setMessages, setLoading, accessDenied, isValidating, navigate, isAdmin]);
 
   useEffect(() => {
     if (roomId) {
@@ -355,7 +352,7 @@ const ChatRoomPage = () => {
     <div className="flex flex-col h-screen bg-gray-50">
       <ChatHeader roomId={roomId} otherUser={otherUser} />
       
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 min-h-0">
         <ChatMessageList roomId={roomId} />
       </div>
 

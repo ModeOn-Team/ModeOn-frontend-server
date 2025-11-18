@@ -118,12 +118,34 @@ const useChatSocket = (roomId) => {
                       console.warn("메시지에 id가 없습니다:", data);
                     }
                     
+                    // 안내 메시지 디버깅
+                    if (data.messageType === "SYSTEM" || 
+                        (data.message && (
+                          data.message.includes("고객님께서 주문하시는 제품은 모두") ||
+                          data.message.includes("교환/반품 안내") ||
+                          data.message.includes("상품 수령일로부터 7일 이내")
+                        ))) {
+                      console.log("안내 메시지 수신:", {
+                        messageType: data.messageType,
+                        sender: data.sender,
+                        message: data.message?.substring(0, 100),
+                        fullData: data
+                      });
+                    }
+                    
+                    // 이미지 메시지인 경우, message가 Base64인지 확인
+                    const isImageBase64 = data.messageType === "IMAGE" && 
+                      data.message && 
+                      typeof data.message === 'string' && 
+                      data.message.startsWith('data:image');
+                    
                     addMessage(roomId, {
                       id: data.id || `msg-${data.roomId}-${data.createdAt || Date.now()}-${Math.random()}`,
                       roomId: data.roomId,
                       senderId: data.sender === "USER" ? data.userId : data.adminId,
                       receiverId: data.sender === "USER" ? data.adminId : data.userId,
-                      content: data.message,
+                      // 이미지 메시지이고 message가 Base64인 경우 content는 빈 문자열로 설정
+                      content: isImageBase64 ? "" : (data.message || ""),
                       messageType: data.messageType,
                       timestamp: data.createdAt || new Date().toISOString(),
                       isRead: false,
@@ -131,6 +153,11 @@ const useChatSocket = (roomId) => {
                       userId: data.userId,
                       adminId: data.adminId,
                       metadata: data.metadata,
+                      ...(data.messageType === "IMAGE" && { fileUrl: data.message || data.imageUrl }),
+                      ...(data.messageType === "FILE" && {
+                        fileUrl: data.message || data.fileUrl,
+                        fileName: data.metadata ? (typeof data.metadata === 'string' ? JSON.parse(data.metadata)?.fileName : data.metadata?.fileName) : null,
+                      }),
                     });
                   }
                 } catch (error) {

@@ -18,6 +18,7 @@ const ChatListPage = () => {
   const maxRetries = 3;
 
   // 채팅방 생성하고 바로 열기
+  // 백엔드 API가 기존 채팅방이 있으면 반환하고, 없으면 새로 생성함
   const createAndOpenChatRoom = async (isRetry = false) => {
     try {
       if (!isRetry) {
@@ -32,9 +33,12 @@ const ChatListPage = () => {
         return;
       }
 
+      // 백엔드 API 호출: 기존 채팅방이 있으면 반환, 없으면 새로 생성
       const response = await joinChatRoom(user.id);
-      console.log("채팅방 생성 응답:", response);
+      console.log("채팅방 생성/조회 응답:", response);
+      
       if (response?.roomId) {
+        // 기존 채팅방이 있으면 해당 채팅방으로 이동
         setCurrentRoomId(String(response.roomId));
         navigate(`/chat/${response.roomId}`);
       } else {
@@ -155,11 +159,19 @@ const ChatListPage = () => {
         return;
       }
 
-      // 최초 진입 시 채팅방 생성 (백엔드: POST /api/chating/join?userId={userId})
+      // roomId가 있으면 해당 채팅방으로 이동
+      if (roomId) {
+        setCurrentRoomId(String(roomId));
+        navigate(`/chat/${roomId}`);
+        return;
+      }
+
+      // roomId가 없으면 기존 채팅방 조회 또는 새로 생성
+      // 백엔드 API가 기존 채팅방이 있으면 반환하고, 없으면 새로 생성함
       const response = await joinChatRoom(user.id);
 
       if (response?.roomId) {
-        setCurrentRoomId(response.roomId);
+        setCurrentRoomId(String(response.roomId));
         navigate(`/chat/${response.roomId}`);
       } else {
         setError("채팅방 생성 실패: roomId를 받지 못했습니다.");

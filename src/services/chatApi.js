@@ -5,8 +5,12 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 const WS_URL = import.meta.env.VITE_WS_URL || "http://localhost:8080";
 
 // 채팅방 생성 및 WebSocket 연결 정보 받기
-export const joinChatRoom = async (userId) => {
-  const response = await api.post(`/api/chating/join?userId=${userId}`);
+// roomId를 지정할 수 있는 옵션 추가 (백엔드 지원 시)
+export const joinChatRoom = async (userId, roomId = null) => {
+  const url = roomId 
+    ? `/api/chating/join?userId=${userId}&roomId=${roomId}`
+    : `/api/chating/join?userId=${userId}`;
+  const response = await api.post(url);
   return response.data;
 };
 
@@ -123,6 +127,18 @@ export const validateChatRoomAccess = async (roomId) => {
     }
     throw error;
   }
+};
+
+// 배송문의 안내 메시지 전송
+export const sendDeliveryInquiryMessage = async (roomId) => {
+  const response = await api.post(`/api/chating/message/delivery-inquiry?roomId=${roomId}`);
+  return response.data;
+};
+
+// 교환/반품 안내 메시지 전송
+export const sendExchangeReturnMessage = async (roomId) => {
+  const response = await api.post(`/api/chating/message/exchange-return?roomId=${roomId}`);
+  return response.data;
 };
 
 // STOMP WebSocket 연결 URL
