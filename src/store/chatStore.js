@@ -27,16 +27,74 @@ const useChatStore = create((set, get) => ({
     const messages = get().messages;
     const roomMessages = messages[roomId] || [];
     
+    // 중복 메시지 체크 (같은 id가 있으면 추가하지 않음)
     if (roomMessages.some((m) => m.id === message.id)) {
       return;
+    }
+    
+    // 백엔드에서 받은 메시지인 경우, 같은 내용의 임시 메시지(temp-user-, temp-image-로 시작하는 ID) 제거
+    // 임시 메시지는 프론트엔드에서 즉시 표시하기 위해 추가한 것이므로, 백엔드에서 받은 메시지로 대체
+    const filteredMessages = roomMessages.filter((m) => {
+      // id가 없으면 유지
+      if (!m.id || typeof m.id !== 'string') {
+        return true;
+      }
+      
+      // 임시 메시지가 아니면 유지
+      if (!m.id.startsWith("temp-user-") && !m.id.startsWith("temp-image-")) {
+        return true;
+      }
+      
+      // 텍스트 메시지인 경우: 내용이 같고 같은 sender이면 제거
+      if (m.messageType === "TEXT" || !m.messageType) {
+        if (
+          m.content === message.content &&
+          m.sender === message.sender &&
+          m.senderId === message.senderId
+        ) {
+          return false; // 제거
+        }
+      }
+      
+      // 이미지 메시지인 경우: fileUrl이 같고 같은 sender이면 제거
+      if (m.messageType === "IMAGE" && message.messageType === "IMAGE") {
+        if (
+          m.fileUrl === message.fileUrl &&
+          m.sender === message.sender &&
+          m.senderId === message.senderId
+        ) {
+          return false; // 제거
+        }
+      }
+      
+      return true; // 유지
+    });
+    
+    const finalMessages = [...filteredMessages, message].sort(
+      (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+    );
+    
+    // 안내 메시지 디버깅
+    if (message.messageType === "SYSTEM" || 
+        (message.content && (
+          message.content.includes("고객님께서 주문하시는 제품은 모두") ||
+          message.content.includes("교환/반품 안내") ||
+          message.content.includes("상품 수령일로부터 7일 이내")
+        ))) {
+      console.log("안내 메시지 store에 추가:", {
+        id: message.id,
+        messageType: message.messageType,
+        sender: message.sender,
+        content: message.content?.substring(0, 100),
+        roomId,
+        totalMessages: finalMessages.length
+      });
     }
     
     set({
       messages: {
         ...messages,
-        [roomId]: [...roomMessages, message].sort(
-          (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-        ),
+        [roomId]: finalMessages,
       },
     });
   },

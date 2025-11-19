@@ -5,7 +5,8 @@ import MainLayout from "../components/layout/MainLayout";
 import CartPage from "./CartPage";
 import Wishlist from "../components/mypage/Wishlist";
 import HistoryPage from "./HistoryPage";
-
+import ChatListPage from "./ChatListPage";
+// import Reviews from "../components/mypage/Reviews";
 
 const MyPage = () => {
   const [activeTab, setActiveTab] = useState("cart");
@@ -21,6 +22,11 @@ const MyPage = () => {
     { id: "cart", label: "장바구니" },
     { id: "wishlist", label: "찜 목록" },
     { id: "orders", label: "주문내역" },
+    { id: "chat", label: "1:1 문의" },
+    // { id: "membership", label: "멤버십 등급" },
+    // { id: "points", label: "누적 포인트" },
+    // { id: "coupons", label: "쿠폰" },
+    // { id: "reviews", label: "내가 작성한 후기" },
   ];
 
   const handleMembership = () => {
@@ -64,6 +70,9 @@ const MyPage = () => {
           {activeTab === "cart" && <CartPage />}
           {activeTab === "wishlist" && <Wishlist />}
           {activeTab === "orders" && <HistoryPage />}
+          {activeTab === "ordersDetail" && <HistoryDetailPage />}
+          {activeTab === "chat" && <ChatListPage />}
+          {/* {activeTab === "reviews" && <Reviews />} */}
         </main>
       </div>
     </MainLayout>

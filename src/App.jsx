@@ -26,6 +26,7 @@ import RequestPage from "./pages/RequestPage.jsx";
 import Mypage from "./pages/myPage.jsx";
 import SearchProductPage from "./pages/searchProductPage.jsx";
 import OrderSheetPage from "./pages/OrderSheetPage.jsx";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
@@ -38,8 +39,6 @@ export default function App() {
           path="/"
           element={isAuthenticated ? <Home /> : <Navigate to="/auth" replace />}
         />
-
-        {/* 인증 */}
         <Route path="/oauth2/callback" element={<OAuth2Callback />} />
         <Route
           path="/auth"
@@ -60,6 +59,43 @@ export default function App() {
         <Route path="/product/:id" element={<ProductDetailPage />} />
 
         {/* 검색 */}
+        <Route
+          path="/chat"
+          element={
+            isAuthenticated ? <ChatListPage /> : <Navigate to="/auth" replace />
+          }
+        />
+        <Route
+          path="/chat/:roomId"
+          element={
+            <ProtectedRoute>
+              <ChatRoomPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chat/admin"
+          element={
+            isAuthenticated ? (
+              <AdminChatListPage />
+            ) : (
+              <Navigate to="/auth" replace />
+            )
+          }
+        />
+        <Route
+          path={import.meta.env.VITE_ADMIN_PAGE_URL || "/admin"}
+          element={
+            isAuthenticated ? <AdminPage /> : <Navigate to="/" replace />
+          }
+        />
+        <Route
+          path="/product"
+          element={
+            isAuthenticated ? <ProductPage /> : <Navigate to="/" replace />
+          }
+        />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
         <Route
           path="/search"
           element={isAuthenticated ? <SearchProductPage /> : <Navigate to="/" replace />}
@@ -91,8 +127,6 @@ export default function App() {
           path="/orders/:id/request"
           element={isAuthenticated ? <RequestPage /> : <Navigate to="/auth" replace />}
         />
-
-        {/* 리뷰 */}
         <Route
           path="/review/write/:historyId"
           element={isAuthenticated ? <ReviewWrite /> : <Navigate to="/auth" replace />}
@@ -105,8 +139,6 @@ export default function App() {
           path="/review/edit/:reviewId"
           element={isAuthenticated ? <ReviewEdit /> : <Navigate to="/auth" replace />}
         />
-
-        {/* 마이페이지 */}
         <Route
           path="/mypage"
           element={isAuthenticated ? <Mypage /> : <Navigate to="/auth" replace />}
