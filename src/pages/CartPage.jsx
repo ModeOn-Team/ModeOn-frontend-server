@@ -18,6 +18,17 @@ function CartPage() {
 
   useEffect(() => {
     loadCart();
+
+    // 결제 완료 후 장바구니 갱신을 위한 이벤트 리스너
+    const handleCartUpdate = () => {
+      loadCart();
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdate);
+
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+    };
   }, []);
 
   // 전체 선택
@@ -67,11 +78,10 @@ function CartPage() {
       id: item.id,
       size: item.size,
       color: item.color,
-      count: Number(item.count),               
-      productPrice: Number(item.productPrice),  
-      productName: item.productName
+      count: item.count,               
+      productPrice: item.productPrice,  
+      productName: item.productName     
     }));
-    
   
     const query = new URLSearchParams({
       items: JSON.stringify(normalizedItems),

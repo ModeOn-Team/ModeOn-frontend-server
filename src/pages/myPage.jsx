@@ -11,14 +11,11 @@ const MyPage = () => {
   const [activeTab, setActiveTab] = useState("cart");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-
-  
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab) {
-      setActiveTab(tab);
-    }
+    if (tab) setActiveTab(tab);
   }, [searchParams]);
+  
 
   const tabs = [
     { id: "cart", label: "장바구니" },
