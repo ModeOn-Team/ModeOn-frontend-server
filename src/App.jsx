@@ -17,14 +17,15 @@ import MembershipLevelPage from "./pages/MembershipLevelPage.jsx";
 import CouponPage from "./pages/CouponPage.jsx";
 import PointPage from "./pages/PointPage.jsx";
 import ReviewPage from "./pages/ReviewPage.jsx";
-import HistoryPage from "./pages/HistoryPage";
-import HistoryDetail from "./pages/HistoryDetail";
-import ReviewWrite from "./pages/ReviewWrite";
-import ReviewDetail from "./pages/ReviewDetail";
-import ReviewEdit from "./pages/ReviewEdit";
-import RequestPage from "./pages/RequestPage";
-import Mypage from "./pages/myPage";
+import HistoryPage from "./pages/HistoryPage.jsx";
+import HistoryDetail from "./pages/HistoryDetail.jsx";
+import ReviewWrite from "./pages/ReviewWrite.jsx";
+import ReviewDetail from "./pages/ReviewDetail.jsx";
+import ReviewEdit from "./pages/ReviewEdit.jsx";
+import RequestPage from "./pages/RequestPage.jsx";
+import Mypage from "./pages/myPage.jsx";
 import SearchProductPage from "./pages/searchProductPage.jsx";
+import OrderSheetPage from "./pages/OrderSheetPage.jsx";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 
 export default function App() {
@@ -33,6 +34,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* 메인 */}
         <Route
           path="/"
           element={isAuthenticated ? <Home /> : <Navigate to="/auth" replace />}
@@ -42,6 +44,21 @@ export default function App() {
           path="/auth"
           element={isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />}
         />
+
+        {/* 관리자 */}
+        <Route
+          path={import.meta.env.VITE_ADMIN_PAGE_URL || "/admin"}
+          element={isAuthenticated ? <AdminPage /> : <Navigate to="/auth" replace />}
+        />
+
+        {/* 상품 */}
+        <Route
+          path="/product"
+          element={isAuthenticated ? <ProductPage /> : <Navigate to="/auth" replace />}
+        />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
+
+        {/* 검색 */}
         <Route
           path="/chat"
           element={
@@ -81,17 +98,23 @@ export default function App() {
         <Route path="/product/:id" element={<ProductDetailPage />} />
         <Route
           path="/search"
-          element={
-            isAuthenticated ? (
-              <SearchProductPage />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
+          element={isAuthenticated ? <SearchProductPage /> : <Navigate to="/" replace />}
         />
+
+        {/* 장바구니 */}
         <Route path="/cart" element={<CartPage />} />
+
+        {/* 주문서 */}
+        <Route
+          path="/order"
+          element={isAuthenticated ? <OrderSheetPage /> : <Navigate to="/auth" replace />}
+        />
+
+        {/* 결제 */}
         <Route path="/success" element={<Success />} />
         <Route path="/fail" element={<Fail />} />
+
+        {/* 주문 내역 */}
         <Route
           path="/orders"
           element={isAuthenticated ? <HistoryPage /> : <Navigate to="/auth" replace />}
@@ -118,33 +141,33 @@ export default function App() {
         />
         <Route
           path="/mypage"
-          element={
-            isAuthenticated ? <Mypage /> : <Navigate to="/auth" replace />
-          }
+          element={isAuthenticated ? <Mypage /> : <Navigate to="/auth" replace />}
         />
         <Route
           path="/mypage/membership"
-          element={
-            isAuthenticated ? (
-              <MembershipLevelPage />
-            ) : (
-              <Navigate to="/auth" replace />
-            )
-          }
+          element={isAuthenticated ? <MembershipLevelPage /> : <Navigate to="/auth" replace />}
         />
         <Route
           path="/mypage/membership/:id"
-          element={
-            isAuthenticated ? (
-              <MembershipDetailPage />
-            ) : (
-              <Navigate to="/auth" replace />
-            )
-          }
+          element={isAuthenticated ? <MembershipDetailPage /> : <Navigate to="/auth" replace />}
         />
         <Route path="/mypage/point" element={<PointPage />} />
         <Route path="/mypage/coupon" element={<CouponPage />} />
         <Route path="/mypage/reviews" element={<ReviewPage />} />
+
+        {/* 채팅 */}
+        <Route
+          path="/chat"
+          element={isAuthenticated ? <ChatListPage /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/chat/:roomId"
+          element={isAuthenticated ? <ChatRoomPage /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/chat/admin"
+          element={isAuthenticated ? <AdminChatListPage /> : <Navigate to="/auth" replace />}
+        />
       </Routes>
     </BrowserRouter>
   );
