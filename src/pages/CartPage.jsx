@@ -67,10 +67,11 @@ function CartPage() {
       id: item.id,
       size: item.size,
       color: item.color,
-      count: item.count,               
-      productPrice: item.productPrice,  
-      productName: item.productName     
+      count: Number(item.count),               
+      productPrice: Number(item.productPrice),  
+      productName: item.productName
     }));
+    
   
     const query = new URLSearchParams({
       items: JSON.stringify(normalizedItems),
