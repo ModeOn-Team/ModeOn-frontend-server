@@ -53,33 +53,35 @@ function CartPage() {
     loadCart();
   };
 
-  // 결제
-  const handlePayment = async () => {
+ 
+  const handlePayment = () => {
     const selectedProducts = cartItems.filter((item) =>
       selectedItems.includes(item.id)
     );
+  
     if (selectedProducts.length === 0)
       return alert("결제할 상품을 선택하세요.");
+  
 
-    const totalAmount = selectedProducts.reduce(
-      (sum, item) => sum + item.productPrice * item.count,
-      0
-    );
-
-    const tossPayments = await loadTossPayments(
-      import.meta.env.VITE_TOSS_CLIENT_KEY
-    );
-    const orderId = "order_" + Date.now();
-
-    await tossPayments.requestPayment("카드", {
-      amount: totalAmount,
-      orderId,
-      orderName: selectedProducts.map((p) => p.productName).join(", "),
-      successUrl: `${window.location.origin}/success`,
-      failUrl: `${window.location.origin}/fail`,
-    });
+    const normalizedItems = selectedProducts.map((item) => ({
+      id: item.id,
+      size: item.size,
+      color: item.color,
+      count: item.count,               
+      productPrice: item.productPrice,  
+      productName: item.productName     
+    }));
+  
+    const query = new URLSearchParams({
+      items: JSON.stringify(normalizedItems),
+      from: "cart",
+    }).toString();
+  
+    window.location.href = `/order?${query}`;
   };
+  
 
+  
   // 총액 계산
   const totalPrice = cartItems
     .filter((item) => selectedItems.includes(item.id))

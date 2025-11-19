@@ -178,9 +178,26 @@ const ProductDetailSide = ({
         <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition" onClick={()=> handleAddToCart(selectedOptions)}>
           장바구니
         </button>
-        <button className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition">
-          구매하기
-        </button>
+        <button
+  className="bg-black text-white w-full py-3 rounded-xl hover:bg-red-400 transition"
+  onClick={() => {
+    if (selectedOptions.length === 0) {
+      alert("옵션을 선택해주세요.");
+      return;
+    }
+
+    // 주문서로 이동
+    const query = new URLSearchParams({
+      productId: id,
+      items: JSON.stringify(selectedOptions),
+    }).toString();
+
+    navigate(`/order?${query}`);
+  }}
+>
+  구매하기
+</button>
+
       </div>
 
       <div className="text-sm mt-3">
