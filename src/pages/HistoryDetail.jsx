@@ -23,6 +23,7 @@ function HistoryDetail() {
         setReview(null);
       }
     };
+
     load();
   }, [id]);
 
@@ -35,6 +36,7 @@ function HistoryDetail() {
     DELIVERED: "배송 완료",
   };
 
+  const statusSteps = ["PAID", "PREPARING", "SHIPPING", "DELIVERED"];
   const statusKey = (info.status || "PAID").toUpperCase();
 
   const requestStatusText = {
@@ -46,31 +48,17 @@ function HistoryDetail() {
     EXCHANGE_REJECTED: "교환 거절됨",
   };
 
-  const statusSteps = ["PAID", "PREPARING", "SHIPPING", "DELIVERED"];
-
-  const goProductDetail = () => {
-    if (info.productId) navigate(`/product/${info.productId}`);
-  };
-
   return (
     <MainLayout>
       <div className="max-w-screen-md mx-auto py-16 space-y-10">
-
         <h2 className="text-3xl font-bold mb-4">주문 상세 내역</h2>
 
-
         {info.requestStatus && (
-          <span
-            className="
-              inline-block px-3 py-1 text-xs text-gray-600
-              border border-gray-300 rounded-full bg-white
-            "
-          >
+          <span className="inline-block px-3 py-1 text-xs text-gray-600 border border-gray-300 rounded-full bg-white">
             {requestStatusText[info.requestStatus]}
           </span>
         )}
 
-        {/* 관리자 답변 */}
         {info.adminResponseReason && (
           <div className="px-4 py-2 mt-2 text-sm text-gray-700 border border-gray-200 rounded-lg bg-gray-50">
             관리자 답변: {info.adminResponseReason}
@@ -79,7 +67,7 @@ function HistoryDetail() {
 
         {/* 상품 카드 */}
         <div
-          onClick={goProductDetail}
+          onClick={() => navigate(`/product/${info.productId}`)}
           className="bg-white p-8 rounded-3xl border shadow hover:shadow-lg transition flex gap-8 cursor-pointer"
         >
           <img
@@ -100,7 +88,12 @@ function HistoryDetail() {
             </div>
 
             <div className="space-y-1">
+              {info.size && info.color && (
+                <p className="text-gray-600">옵션 : {info.size} / {info.color}</p>
+              )}
+
               <p className="text-gray-600">수량 : {info.count}개</p>
+
               <p className="text-3xl font-bold text-gray-900">
                 {info.totalPrice.toLocaleString()}원
               </p>
@@ -115,6 +108,7 @@ function HistoryDetail() {
           <div className="flex justify-between">
             {statusSteps.map((step, i) => {
               const active = statusSteps.indexOf(statusKey) >= i;
+
               return (
                 <div key={step} className="flex flex-col items-center flex-1">
                   <div
@@ -134,7 +128,6 @@ function HistoryDetail() {
             })}
           </div>
 
-          {/* 진행 바 */}
           <div className="h-1 bg-gray-200 rounded relative">
             <div
               className="absolute left-0 top-0 h-1 bg-blue-600 rounded"
@@ -152,65 +145,72 @@ function HistoryDetail() {
           </div>
 
           <div className="text-sm space-y-1 pt-2 text-gray-700">
-            <p><strong>결제 완료:</strong> {info.createdAt}</p>
-            <p><strong>배송 시작:</strong> {info.shippedAt || "-"}</p>
-            <p><strong>배송 완료:</strong> {info.deliveredAt || "-"}</p>
+            <p>
+              <strong>결제 완료:</strong> {info.createdAt}
+            </p>
+            <p>
+              <strong>배송 시작:</strong> {info.shippedAt || "-"}
+            </p>
+            <p>
+              <strong>배송 완료:</strong> {info.deliveredAt || "-"}
+            </p>
           </div>
         </div>
 
-
+        {/* 배송 정보 */}
         <div className="bg-white p-8 rounded-3xl border shadow space-y-3">
           <h3 className="text-xl font-semibold">배송 정보</h3>
 
           {info.trackingNumber ? (
             <>
-              <p className="text-sm"><strong>운송장 번호:</strong> {info.trackingNumber}</p>
-              <p className="text-sm"><strong>택배사:</strong> {info.courierCode || "-"}</p>
+              <p className="text-sm">
+                <strong>운송장 번호:</strong> {info.trackingNumber}
+              </p>
+              <p className="text-sm">
+                <strong>택배사:</strong> {info.courierCode || "-"}
+              </p>
             </>
           ) : (
             <p className="text-xs text-gray-500">배송 정보가 없습니다.</p>
           )}
         </div>
-      
-<div className="flex justify-between items-center mt-10">
 
+        {/* 버튼 영역 */}
+        <div className="flex justify-between items-center mt-10">
+          <div>
+            {review ? (
+              <button
+                onClick={() => navigate(`/review/${review.id}`)}
+                className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-100 transition"
+              >
+                리뷰 보기
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate(`/review/write/${id}`)}
+                className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+              >
+                리뷰 작성하기
+              </button>
+            )}
+          </div>
 
-<div>
-  {review ? (
-    <button
-      onClick={() => navigate(`/review/${review.id}`)}
-      className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-100 transition"
-    >
-      리뷰 보기
-    </button>
-  ) : (
-    <button
-      onClick={() => navigate(`/review/write/${id}`)}
-      className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
-    >
-      리뷰 작성하기
-    </button>
-  )}
-</div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate("/orders")}
+              className="px-4 py-2 border border-gray-400 text-gray-700 rounded-lg hover:bg-gray-100 transition"
+            >
+              주문내역으로 돌아가기
+            </button>
 
-<div className="flex gap-3">
-  <button
-    onClick={() => navigate("/orders")}
-    className="px-4 py-2 border border-gray-400 text-gray-700 rounded-lg hover:bg-gray-100 transition"
-  >
-    주문내역으로 돌아가기
-  </button>
-
-  <button
-    onClick={() => navigate("/")}
-    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
-  >
-    홈으로
-  </button>
-</div>
-</div>
-
-
+            <button
+              onClick={() => navigate("/")}
+              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+            >
+              홈으로
+            </button>
+          </div>
+        </div>
       </div>
     </MainLayout>
   );

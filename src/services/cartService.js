@@ -8,16 +8,18 @@ export const cartService = {
     return res.data;
   },
 
-  addItem: async (variantId, count) => {
-    const res = await api.post("/api/cart", { variantId, count });
+  addItem: async ({ variantId, productId, count, size, color }) => {
+    const res = await api.post("/api/cart", { variantId, productId, count, size, color });
     return res.data;
   },
+  
 
 
-  updateCount: async (productId, count) => {
-    const res = await api.patch(`/api/cart/${productId}?count=${count}`);
+  updateCount: async (cartId, count) => {
+    const res = await api.patch(`/api/cart/item/${cartId}?count=${count}`);
     return res.data;
   },
+  
 
   removeItem: async (cartId) => {
     const res = await api.delete(`/api/cart/item/${cartId}`); 

@@ -18,6 +18,17 @@ function CartPage() {
 
   useEffect(() => {
     loadCart();
+
+    // 결제 완료 후 장바구니 갱신을 위한 이벤트 리스너
+    const handleCartUpdate = () => {
+      loadCart();
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdate);
+
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+    };
   }, []);
 
   // 전체 선택
@@ -39,11 +50,11 @@ function CartPage() {
   // 수량 변경
   const handleCountChange = async (item, delta) => {
     const newCount = Math.max(item.count + delta, 1);
-    await cartService.updateCount(item.productId, newCount);
+    await cartService.updateCount(item.id, newCount);
     loadCart();
   };
 
-  //선택 삭제
+  // 선택 삭제
   const handleRemoveSelected = async () => {
     for (const cartItemId of selectedItems) {
       await cartService.removeItem(cartItemId);
@@ -53,33 +64,35 @@ function CartPage() {
     loadCart();
   };
 
-  // 결제
-  const handlePayment = async () => {
+ 
+  const handlePayment = () => {
     const selectedProducts = cartItems.filter((item) =>
       selectedItems.includes(item.id)
     );
+  
     if (selectedProducts.length === 0)
       return alert("결제할 상품을 선택하세요.");
+  
 
-    const totalAmount = selectedProducts.reduce(
-      (sum, item) => sum + item.productPrice * item.count,
-      0
-    );
-
-    const tossPayments = await loadTossPayments(
-      import.meta.env.VITE_TOSS_CLIENT_KEY
-    );
-    const orderId = "order_" + Date.now();
-
-    await tossPayments.requestPayment("카드", {
-      amount: totalAmount,
-      orderId,
-      orderName: selectedProducts.map((p) => p.productName).join(", "),
-      successUrl: `${window.location.origin}/success`,
-      failUrl: `${window.location.origin}/fail`,
-    });
+    const normalizedItems = selectedProducts.map((item) => ({
+      id: item.id,
+      size: item.size,
+      color: item.color,
+      count: item.count,               
+      productPrice: item.productPrice,  
+      productName: item.productName     
+    }));
+  
+    const query = new URLSearchParams({
+      items: JSON.stringify(normalizedItems),
+      from: "cart",
+    }).toString();
+  
+    window.location.href = `/order?${query}`;
   };
+  
 
+  
   // 총액 계산
   const totalPrice = cartItems
     .filter((item) => selectedItems.includes(item.id))
@@ -134,7 +147,13 @@ function CartPage() {
                 />
 
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium truncate">{item.productName} -</h3>
+                  <h3 className="font-medium truncate">{item.productName}</h3>
+
+               
+                  <p className="text-sm text-gray-500">
+                    옵션: {item.size} / {item.color}
+                  </p>
+
                   <p className="text-gray-500 mt-1">
                     {item.productPrice.toLocaleString()}원
                   </p>

@@ -58,7 +58,9 @@ export default function RequestPage() {
       });
   
       alert(type === "REFUND" ? "환불 요청 완료!" : "교환 요청 완료!");
-      navigate("/orders");
+      navigate("/mypage?tab=orders");
+
+
     } catch (err) {
       console.error(err);
       alert("요청 처리 중 오류가 발생했습니다.");

@@ -15,21 +15,28 @@ function ReviewWrite() {
 
   const handleSubmit = async () => {
     if (!content.trim()) return alert("리뷰 내용을 입력해주세요!");
-
+  
     try {
+
+      const historyRes = await api.get(`/api/history/${historyId}`);
+      const productId = historyRes.data.productId;  
+  
       await api.post(`/api/reviews/${historyId}`, {
         rating,
         content,
       });
-
+  
       alert("리뷰가 작성되었습니다!");
-      navigate(`/orders/${historyId}`);
+  
+
+      navigate(`/product/${productId}`);
+  
     } catch (err) {
       console.error(err);
       alert("리뷰 작성에 실패했습니다.");
     }
   };
-
+  
   return (
     <MainLayout>
       <div className="max-w-screen-md mx-auto py-14 space-y-8">
