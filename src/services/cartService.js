@@ -1,5 +1,5 @@
 
-import api from "../lib/api"; 
+import api from "../lib/api";
 
 export const cartService = {
 
@@ -8,8 +8,8 @@ export const cartService = {
     return res.data;
   },
 
-  addItem: async (productId, count) => {
-    const res = await api.post("/api/cart", { productId, count });
+  addItem: async (variantId, count) => {
+    const res = await api.post("/api/cart", { variantId, count });
     return res.data;
   },
 
