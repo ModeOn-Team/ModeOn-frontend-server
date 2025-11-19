@@ -1,48 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout.jsx";
-import { getUserReviews } from "../services/review.js";
+import { reviewService } from "../services/reviewService.js";
 
 function ReviewPage() {
   const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchReviews = async () => {
-      setLoading(true);
+
+    const loadReviews = async () => {
       try {
-        const data = await getUserReviews();
-        setReviews(data);
+        const list = await reviewService.getReviewsByUser();
+        setReviews(list.content);
       } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+        console.error("리뷰 불러오기 실패:", err);
       }
     };
-    fetchReviews();
+
+    loadReviews();
   }, []);
-
-  const renderStars = (rating) => {
-    return [...Array(5)].map((_, i) => (
-      <span
-        key={i}
-        className={i < rating ? "text-yellow-400" : "text-gray-300"}
-      >
-        ★
-      </span>
-    ));
-  };
-
-  if (loading) {
-    return (
-      <MainLayout>
-        <div className="max-w-6xl mx-auto py-8 px-4 text-center">
-          <p className="text-gray-600">리뷰를 불러오는 중...</p>
-        </div>
-      </MainLayout>
-    );
-  }
 
   return (
     <MainLayout>
@@ -62,40 +39,21 @@ function ReviewPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {reviews.map((review) => (
+            {reviews.map((r) => (
               <div
-                key={review.id}
-                className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm"
+                key={r.id}
+                className="border rounded-xl p-5 bg-white shadow-sm"
               >
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="font-semibold text-lg">
-                    {review.productName}
-                  </h3>
-                  <span className="text-sm text-gray-500">{review.date}</span>
-                </div>
-
-                <div className="flex items-center gap-1 mb-2">
-                  {renderStars(review.rating)}
-                  <span className="ml-2 text-sm text-gray-600">
-                    ({review.rating}.0)
+                <div className="flex justify-between mb-2">
+                  <span className="font-medium">{r.userName}</span>
+                  <span className="text-yellow-500 text-lg">
+                    {"⭐".repeat(r.rating)}
                   </span>
                 </div>
 
-                <h4 className="font-medium text-gray-800 mb-2">
-                  {review.title}
-                </h4>
+                <p className="text-gray-800 whitespace-pre-line">{r.content}</p>
 
-                <p className="text-gray-700 leading-relaxed">
-                  {review.content}
-                </p>
-
-                {review.image && (
-                  <img
-                    src={review.image}
-                    alt="리뷰 이미지"
-                    className="mt-4 w-full max-w-md rounded-lg"
-                  />
-                )}
+                <p className="text-gray-400 text-xs mt-2">{r.createdAt}</p>
               </div>
             ))}
           </div>

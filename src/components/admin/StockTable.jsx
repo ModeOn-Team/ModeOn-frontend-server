@@ -1,7 +1,7 @@
 import { forwardRef, useState } from "react";
 
 const StockTable = forwardRef(
-  ({ product, ProductVariantUpdate, onRefresh }, ref) => {
+  ({ product, ProductVariantUpdate, onRefresh, onLocalUpdateStock }, ref) => {
     const [stockChange, setStockChange] = useState({});
 
     const handleStockUpdate = async (variant, isIncrease) => {
@@ -18,6 +18,11 @@ const StockTable = forwardRef(
           color: variant.color,
           stock: stockDiff,
         });
+
+        if (onLocalUpdateStock) {
+          onLocalUpdateStock(variant.id, stockDiff);
+        }
+
         setStockChange((prev) => ({ ...prev, [variant.id]: "" }));
 
         if (onRefresh) await onRefresh();

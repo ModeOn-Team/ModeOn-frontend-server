@@ -43,7 +43,7 @@ const Category = () => {
 
   useEffect(() => {
     fetchCategories();
-  }, [fetchCategories]);
+  }, [categories]);
 
   return (
     <div>

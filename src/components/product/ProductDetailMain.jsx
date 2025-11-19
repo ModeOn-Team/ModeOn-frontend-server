@@ -1,6 +1,5 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import useCommentStore from "../../store/commentStore";
 import { reviewService } from "../../services/reviewService";
 
 
@@ -14,10 +13,8 @@ const ProductDetailMain = ({ name, detailImages = [], commentCount = 0 }) => {
       ? API_URL + detailImages[0]
       : API_URL + "/images/no-image.png";
 
-  const { comments, getAllComment, addComment } = useCommentStore();
 
   useEffect(() => {
-    getAllComment(id);
 
     const loadReviews = async () => {
       try {
@@ -30,10 +27,6 @@ const ProductDetailMain = ({ name, detailImages = [], commentCount = 0 }) => {
 
     loadReviews();
   }, [id]);
-
-  const handleSubmit = (content) => {
-    addComment(id, { content: content });
-  };
 
   return (
     <>

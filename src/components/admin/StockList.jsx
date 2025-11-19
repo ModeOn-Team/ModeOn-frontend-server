@@ -1,6 +1,6 @@
 import StockTable from "./StockTable";
 
-const StockList = ({ products, ProductVariantUpdate, onRefresh, lastElementRef }) => {
+const StockList = ({ products, ProductVariantUpdate, onRefresh, lastElementRef, onLocalUpdateStock }) => {
   if (!products || products.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
@@ -33,6 +33,7 @@ const StockList = ({ products, ProductVariantUpdate, onRefresh, lastElementRef }
                 product={product}
                 ProductVariantUpdate={ProductVariantUpdate}
                 onRefresh={onRefresh}
+                onLocalUpdateStock={onLocalUpdateStock}
                 ref={isLast ? lastElementRef : null}
               />
             );

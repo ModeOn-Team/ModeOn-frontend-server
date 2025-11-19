@@ -32,6 +32,10 @@ const Stock = () => {
     [loading, totalPages, page]
   );
 
+  const updateLocalStock = () => {
+    fetchProducts(page, page > 0).finally(() => setLoading(false));
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Stock Management</h2>
@@ -40,6 +44,7 @@ const Stock = () => {
         products={products}
         ProductVariantUpdate={ProductVariantUpdate}
         onRefresh={() => setPage(0)}
+        onLocalUpdateStock={updateLocalStock}
         lastElementRef={lastElementRef}
       />
 
