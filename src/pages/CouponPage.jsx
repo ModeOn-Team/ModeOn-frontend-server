@@ -5,7 +5,6 @@ import MainLayout from "../components/layout/MainLayout.jsx";
 import { getUserCoupons, issueCoupon } from "../services/coupon.js";
 import { MembershipService } from "../services/membership.js";
 
-
 function CouponPage() {
   const navigate = useNavigate();
 
@@ -15,16 +14,16 @@ function CouponPage() {
   const [issuing, setIssuing] = useState(null);
   const [error, setError] = useState(null);
 
-  // === 등급별 혜택 쿠폰 매핑 ===
+  // 등급별 쿠폰 이름 매칭 규칙 (백엔드 쿠폰 이름 기반)
   const levelBenefits = {
-    WELCOME: ["가입 축하 쿠폰"],
-    SILVER: ["생일 쿠폰"],
-    GOLD: ["무료배송 쿠폰"],
-    VIP: ["월 1회 10% 할인 쿠폰"],
-    VVIP: ["월 1회 20% 할인 쿠폰", "월 1회 10% 할인 쿠폰"],
+    WELCOME: ["가입 축하"],
+    SILVER: ["생일"],
+    GOLD: ["무료배송"],
+    VIP: ["VIP 월 10%"],
+    VVIP: ["VVIP 월 20%", "VIP 월 10%"],
   };
 
-  // === 데이터 로딩 ===
+  // 데이터 로드
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -38,23 +37,27 @@ function CouponPage() {
         setMembershipLevel(membershipData.level || "WELCOME");
         setCoupons(Array.isArray(couponData) ? couponData : []);
       } catch (err) {
-        setError("쿠폰 정보를 불러오지 못했습니다.");
         console.error(err);
+        setError("쿠폰 정보를 불러오지 못했습니다.");
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
-  // === 쿠폰 발급 ===
+  // 쿠폰 발급
   const handleIssue = async (couponId) => {
     setIssuing(couponId);
     try {
       const result = await issueCoupon(couponId);
       if (result) {
+        // 발급 처리됨 → UI 업데이트
         setCoupons((prev) =>
-          prev.map((c) => (c.id === couponId ? { ...c, issued: true } : c))
+          prev.map((c) =>
+            c.couponId === couponId ? { ...c, isUsed: false } : c
+          )
         );
       }
     } catch (err) {
@@ -64,29 +67,29 @@ function CouponPage() {
     }
   };
 
-  // === 혜택 쿠폰 필터링 ===
-  const benefitNames = levelBenefits[membershipLevel] || [];
+  // 등급 전용 혜택 필터
+  const benefitKeywords = levelBenefits[membershipLevel] || [];
   const benefitCoupons = coupons.filter((c) =>
-    benefitNames.some((name) => c.name.includes(name.split(" ")[0]))
+    benefitKeywords.some((key) => c.name.includes(key))
   );
 
-  // === 로딩 중 ===
+  /* ---- UI 렌더링 ---- */
+
   if (loading) {
     return (
       <MainLayout>
-        <div className="max-w-6xl mx-auto py-8 px-4 text-center">
-          <p className="text-gray-600">쿠폰 정보를 불러오는 중...</p>
+        <div className="max-w-6xl mx-auto py-8 text-center">
+          쿠폰 정보를 불러오는 중...
         </div>
       </MainLayout>
     );
   }
 
-  // === 에러 ===
   if (error) {
     return (
       <MainLayout>
-        <div className="max-w-6xl mx-auto py-8 px-4 text-center">
-          <p className="text-red-600">{error}</p>
+        <div className="max-w-6xl mx-auto py-8 text-center text-red-600">
+          {error}
         </div>
       </MainLayout>
     );
@@ -95,114 +98,89 @@ function CouponPage() {
   return (
     <MainLayout>
       <div className="max-w-6xl mx-auto py-8 px-4">
-        {/* 뒤로가기 */}
         <button
           onClick={() => navigate(-1)}
-          className="mb-6 text-gray-600 hover:text-gray-900 font-semibold flex items-center gap-1"
+          className="mb-6 text-gray-600 hover:text-gray-900 font-semibold"
         >
           Back
         </button>
 
-        <h1 className="text-3xl font-bold mb-8 text-center md:text-left">
-          나의 쿠폰
-        </h1>
+        <h1 className="text-3xl font-bold mb-8">나의 쿠폰</h1>
 
-        {/* === 등급 전용 혜택 쿠폰 === */}
+        {/* 등급 전용 혜택 쿠폰 */}
         {benefitCoupons.length > 0 ? (
-          <div className="mb-10 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
-            <h2 className="text-lg font-bold text-gray-700 mb-3">
+          <div className="mb-10 p-6 bg-gradient-to-r from-purple-50 to-pink-50 border rounded-xl">
+            <h2 className="text-lg font-bold mb-4">
               {membershipLevel} 등급 전용 혜택 쿠폰
             </h2>
-            <div className="space-y-3">
+
+            <div className="space-y-4">
               {benefitCoupons.map((coupon) => (
                 <div
-                  key={coupon.id}
-                  className={`p-4 rounded-lg border ${
-                    coupon.issued
-                      ? "bg-green-50 border-green-300"
-                      : "bg-white border-gray-200"
-                  }`}
+                  key={coupon.couponId}
+                  className="p-4 bg-white border rounded-lg flex justify-between items-center"
                 >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold text-gray-800">
-                        {coupon.name}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        유효기간: ~{" "}
-                        {new Date(coupon.expiryDate).toLocaleDateString(
-                          "ko-KR"
-                        )}
-                      </p>
-                    </div>
-                    {coupon.issued ? (
-                      <span className="text-green-600 font-medium">
-                        발급 완료
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => handleIssue(coupon.id)}
-                        disabled={issuing === coupon.id}
-                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
-                      >
-                        {issuing === coupon.id ? "발급 중..." : "발급받기"}
-                      </button>
-                    )}
+                  <div>
+                    <p className="font-semibold">{coupon.name}</p>
+                    <p className="text-sm text-gray-600">
+                      유효기간: ~{" "}
+                      {new Date(coupon.expiresAt).toLocaleDateString("ko-KR")}
+                    </p>
                   </div>
+
+                  {/* 발급 여부 */}
+                  {coupon.isUsed ? (
+                    <span className="text-green-600 font-medium">
+                      사용 완료
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => handleIssue(coupon.couponId)}
+                      disabled={issuing === coupon.couponId}
+                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {issuing === coupon.couponId ? "발급중..." : "발급받기"}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           </div>
-        ) : membershipLevel ? (
-          <div className="mb-10 p-6 rounded-xl border border-gray-400 text-center">
-            <p className="text-blue-700 font-medium">
-              {membershipLevel} 등급 전용 혜택 쿠폰이 없습니다.
-            </p>
+        ) : (
+          <div className="p-6 border rounded-lg text-center mb-10">
+            {membershipLevel} 등급 전용 혜택 쿠폰이 없습니다.
           </div>
-        ) : null}
+        )}
 
-        {/* === 전체 쿠폰 목록 === */}
+        {/* 전체 쿠폰 목록 */}
         {coupons.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {coupons.map((coupon) => {
-              const isBenefit = benefitCoupons.some((b) => b.id === coupon.id);
+            {coupons.map((coupon) => (
+              <div
+                key={coupon.couponId}
+                className="p-6 bg-white border rounded-xl shadow-sm"
+              >
+                <h3 className="font-bold text-lg mb-2">{coupon.name}</h3>
 
-              return (
-                <div
-                  key={coupon.id}
-                  className={`p-6 rounded-xl border-2 ${
-                    isBenefit
-                      ? "border-purple-400 bg-purple-50"
-                      : "border-gray-200 bg-white"
-                  } shadow-sm hover:shadow-md transition-all`}
-                >
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">
-                    {coupon.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-3">
-                    {coupon.description}
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">
-                      ~{new Date(coupon.expiryDate).toLocaleDateString("ko-KR")}
-                    </span>
-                    {coupon.issued ? (
-                      <span className="text-green-600 font-medium text-sm">
-                        사용 가능
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => handleIssue(coupon.id)}
-                        disabled={issuing === coupon.id}
-                        className="text-sm px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                      >
-                        {issuing === coupon.id ? "..." : "발급"}
-                      </button>
-                    )}
-                  </div>
+                <p className="text-sm text-gray-500 mb-3">
+                  ~ {new Date(coupon.expiresAt).toLocaleDateString("ko-KR")}
+                </p>
+
+                <div className="flex justify-between items-center">
+                  {coupon.isUsed ? (
+                    <span className="text-sm text-green-600">사용 완료</span>
+                  ) : (
+                    <button
+                      onClick={() => handleIssue(coupon.couponId)}
+                      disabled={issuing === coupon.couponId}
+                      className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {issuing === coupon.couponId ? "..." : "발급"}
+                    </button>
+                  )}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         ) : (
           <div className="text-center py-12">
@@ -210,18 +188,15 @@ function CouponPage() {
               사용 가능한 쿠폰이 없습니다.
             </p>
             <p className="text-xs text-gray-400 mt-2">
-              멤버십 등급을 올리거나, 이벤트에 참여해보세요!
+              멤버십 등급을 올리거나 이벤트에 참여해보세요!
             </p>
           </div>
         )}
 
-        {/* === 안내 문구 === */}
         <div className="mt-12 text-center text-sm text-gray-500">
           * 쿠폰은 발급 후 즉시 사용 가능합니다.
           <br />
-          <span className="text-xs">
-            마지막 갱신: {new Date().toLocaleString("ko-KR")}
-          </span>
+          마지막 갱신: {new Date().toLocaleString("ko-KR")}
         </div>
       </div>
     </MainLayout>
