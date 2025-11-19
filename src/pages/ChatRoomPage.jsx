@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ChatHeader from "../components/chat/ChatHeader";
 import ChatMessageList from "../components/chat/ChatMessageList";
 import ChatInput from "../components/chat/ChatInput";
 import useChatSocket from "../hooks/useChatSocket";
 import useChatStore from "../store/chatStore";
-import { getChatMessages, getAdminChatList } from "../services/chatApi";
+import { getChatMessages, getAdminChatList, validateChatRoomAccess } from "../services/chatApi";
 import StorageService from "../services/storage";
 
 // 1:1 채팅 상세 페이지
 // 실시간 메시지 송수신 및 WebSocket 연결 관리
 const ChatRoomPage = () => {
   const { roomId } = useParams();
+  const navigate = useNavigate();
   const {
     setCurrentRoomId,
     isConnected,
@@ -28,12 +29,59 @@ const ChatRoomPage = () => {
   const [initialLoad, setInitialLoad] = useState(false);
   const [otherUser, setOtherUser] = useState(null);
   const [roomInfo, setRoomInfo] = useState(null);
+  const [accessDenied, setAccessDenied] = useState(false);
+  const [isValidating, setIsValidating] = useState(true);
   const currentUser = StorageService.getUser();
   const isAdmin = currentUser?.role === "ROLE_ADMIN";
 
+  // 채팅방 접근 권한 검증
+  useEffect(() => {
+    const validateAccess = async () => {
+      if (!roomId) {
+        setIsValidating(false);
+        setAccessDenied(true);
+        return;
+      }
+
+      const numericRoomId = Number(roomId);
+      if (isNaN(numericRoomId)) {
+        setIsValidating(false);
+        setAccessDenied(true);
+        return;
+      }
+
+      try {
+        const hasAccess = await validateChatRoomAccess(numericRoomId);
+        if (!hasAccess) {
+          setAccessDenied(true);
+          setIsValidating(false);
+          // 3초 후 채팅 목록으로 리다이렉트
+          setTimeout(() => {
+            navigate("/chat", { replace: true });
+          }, 3000);
+          return;
+        }
+        setIsValidating(false);
+      } catch (error) {
+        console.error("채팅방 접근 권한 검증 실패:", error);
+        if (error.response?.status === 403 || error.response?.status === 404) {
+          setAccessDenied(true);
+          setIsValidating(false);
+          setTimeout(() => {
+            navigate("/chat", { replace: true });
+          }, 3000);
+        } else {
+          setIsValidating(false);
+        }
+      }
+    };
+
+    validateAccess();
+  }, [roomId, navigate]);
+
   // 초기 메시지 로드
   useEffect(() => {
-    if (roomId && !initialLoad) {
+    if (roomId && !initialLoad && !accessDenied && !isValidating) {
       const loadMessages = async () => {
         try {
           setLoading(true);
@@ -45,6 +93,39 @@ const ChatRoomPage = () => {
             return;
           }
           
+          // 일반 사용자인 경우: 이전 메시지 히스토리를 불러오지 않고 안내 메시지만 표시
+          if (!isAdmin) {
+            const initialMessageContent = `안녕하세요 모드온입니다 :)\n\n상담 운영시간\n월~금 : 9:00 ~ 18:00\n공휴일 휴무\n\n이 외 궁금하신 사항은 게시판에 남겨주시면 순차적으로 안내해드리겠습니다\n\n궁금한 사항을 선택해주세요`;
+            
+            const buttonMessage = {
+              id: `buttons-${roomId}-${Date.now()}`,
+              roomId: roomId,
+              senderId: null,
+              receiverId: null,
+              content: initialMessageContent,
+              messageType: "SYSTEM_BUTTONS",
+              timestamp: new Date(0).toISOString(), // 최상단에 고정
+              isRead: true,
+              sender: "ADMIN",
+              userId: null,
+              adminId: null,
+              metadata: JSON.stringify({
+                buttons: [
+                  "입고 및 배송 문의",
+                  "배송전 변경 및 취소",
+                  "교환/반품"
+                ]
+              }),
+            };
+            
+            // 안내 메시지만 설정 (이전 메시지 히스토리 불러오지 않음)
+            setMessages(roomId, [buttonMessage]);
+            setInitialLoad(true);
+            setLoading(false);
+            return;
+          }
+          
+          // 관리자인 경우: 기존처럼 모든 메시지 히스토리 불러오기
           const messageList = await getChatMessages(numericRoomId);
           
           // 백엔드 ChatMessageDto를 프론트엔드 형식으로 변환
@@ -75,46 +156,32 @@ const ChatRoomPage = () => {
             };
           });
           
-          // SYSTEM_BUTTONS 타입의 안내사항 메시지가 있는지 확인
-          const hasSystemButtons = convertedMessages.some(
-            msg => msg.messageType === "SYSTEM_BUTTONS" || msg.messageType === "SYSTEM"
-          );
-          
-          // 안내사항 메시지가 없으면 항상 추가 (일반 사용자에게만 표시, 관리자가 보낸 메시지로 처리)
-          if (!hasSystemButtons && !isAdmin) {
-            // 메시지 목록에서 관리자 메시지를 찾아 adminId 추출
-            const adminMessage = convertedMessages.find(msg => msg.sender === "ADMIN" && msg.adminId);
-            const adminId = adminMessage?.adminId || roomInfo?.adminId || null;
-            
-            const buttonMessage = {
-              id: `buttons-${roomId}-${Date.now()}`,
-              roomId: roomId,
-              senderId: adminId,
-              receiverId: null,
-              content: `안녕하세요 모드온입니다 :)\n\n상담 운영시간\n월~금 : 9:00 ~ 18:00\n공휴일 휴무\n\n이 외 궁금하신 사항은 게시판에 남겨주시면 순차적으로 안내해드리겠습니다\n\n궁금한 사항을 선택해주세요`,
-              messageType: "SYSTEM_BUTTONS",
-              timestamp: new Date(0).toISOString(), // 최상단에 고정하기 위해 가장 오래된 시간 사용
-              isRead: true,
-              sender: "ADMIN", // 관리자가 보낸 메시지로 처리 (파란색, 오른쪽)
-              userId: null,
-              adminId: adminId, // 채팅방의 관리자 ID
-              metadata: JSON.stringify({
-                buttons: [
-                  "입고 및 배송 문의",
-                  "배송전 변경 및 취소",
-                  "교환/반품",
-                  "입금확인"
-                ]
-              }),
-            };
-            // 안내사항을 맨 앞에 추가
-            convertedMessages.unshift(buttonMessage);
-          }
-          
           setMessages(roomId, convertedMessages);
           setInitialLoad(true);
         } catch (error) {
           console.error("메시지 로드 실패:", error);
+          
+          // 403 Forbidden: 접근 권한 없음
+          if (error.response?.status === 403) {
+            const errorMessage = error.response?.data?.message || "해당 채팅방의 메시지를 조회할 권한이 없습니다.";
+            useChatStore.getState().setError(errorMessage);
+            setAccessDenied(true);
+            setTimeout(() => {
+              navigate("/chat", { replace: true });
+            }, 3000);
+          } 
+          // 404 Not Found: 채팅방 없음
+          else if (error.response?.status === 404) {
+            setAccessDenied(true);
+            setTimeout(() => {
+              navigate("/chat", { replace: true });
+            }, 3000);
+          }
+          // 기타 에러
+          else {
+            const errorMessage = error.response?.data?.message || "메시지를 불러오는데 실패했습니다.";
+            useChatStore.getState().setError(errorMessage);
+          }
         } finally {
           setLoading(false);
         }
@@ -122,7 +189,7 @@ const ChatRoomPage = () => {
 
       loadMessages();
     }
-  }, [roomId, initialLoad, setMessages, setLoading]);
+  }, [roomId, initialLoad, setMessages, setLoading, accessDenied, isValidating, navigate, isAdmin]);
 
   useEffect(() => {
     if (roomId) {
@@ -208,6 +275,35 @@ const ChatRoomPage = () => {
     }
   }, [roomId, isAdmin]);
 
+  // 접근 권한 검증 중
+  if (isValidating) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-gray-500 mb-2">접근 권한 확인 중...</p>
+          <p className="text-sm text-gray-400">채팅방 정보를 확인하고 있습니다.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 접근 거부
+  if (accessDenied) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-red-500 mb-2 font-semibold">접근 권한이 없습니다</p>
+          <p className="text-sm text-gray-600 mb-4">
+            이 채팅방에 접근할 권한이 없습니다.
+          </p>
+          <p className="text-xs text-gray-400">
+            3초 후 채팅 목록으로 이동합니다...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // WebSocket 연결 상태 확인
   if (validRoomId && !isConnected && !loading) {
     const isAuthError = error?.includes("인증에 실패했습니다") || error?.includes("로그인");
@@ -256,7 +352,7 @@ const ChatRoomPage = () => {
     <div className="flex flex-col h-screen bg-gray-50">
       <ChatHeader roomId={roomId} otherUser={otherUser} />
       
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 min-h-0">
         <ChatMessageList roomId={roomId} />
       </div>
 

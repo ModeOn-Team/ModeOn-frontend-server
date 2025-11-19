@@ -8,6 +8,7 @@ import Wishlist from "../components/mypage/Wishlist";
 // import Membership from "../components/mypage/Membership";
 // import Coupons from "../components/mypage/Coupons";
 import HistoryPage from "./HistoryPage";
+import ChatListPage from "./ChatListPage";
 // import Reviews from "../components/mypage/Reviews";
 
 const MyPage = () => {
@@ -18,6 +19,7 @@ const MyPage = () => {
     { id: "cart", label: "장바구니" },
     { id: "wishlist", label: "찜 목록" },
     { id: "orders", label: "주문내역" },
+    { id: "chat", label: "1:1 문의" },
     // { id: "membership", label: "멤버십 등급" },
     // { id: "points", label: "누적 포인트" },
     // { id: "coupons", label: "쿠폰" },
@@ -70,6 +72,7 @@ const MyPage = () => {
           {/* {activeTab === "coupons" && <Coupons />} */}
           {activeTab === "orders" && <HistoryPage />}
           {activeTab === "ordersDetail" && <HistoryDetailPage />}
+          {activeTab === "chat" && <ChatListPage />}
           {/* {activeTab === "reviews" && <Reviews />} */}
         </main>
       </div>

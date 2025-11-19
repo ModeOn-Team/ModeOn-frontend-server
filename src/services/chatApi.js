@@ -5,12 +5,17 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 const WS_URL = import.meta.env.VITE_WS_URL || "http://localhost:8080";
 
 // 채팅방 생성 및 WebSocket 연결 정보 받기
-export const joinChatRoom = async (userId) => {
-  const response = await api.post(`/api/chating/join?userId=${userId}`);
+// roomId를 지정할 수 있는 옵션 추가 (백엔드 지원 시)
+export const joinChatRoom = async (userId, roomId = null) => {
+  const url = roomId 
+    ? `/api/chating/join?userId=${userId}&roomId=${roomId}`
+    : `/api/chating/join?userId=${userId}`;
+  const response = await api.post(url);
   return response.data;
 };
 
 // 텍스트 메시지 전송
+// 백엔드 인증/인가 강화: sender에 따라 userId 또는 adminId 필수
 export const sendTextMessage = async (data) => {
   const messageDto = {
     roomId: data.roomId,
@@ -21,8 +26,18 @@ export const sendTextMessage = async (data) => {
     userId: data.userId,
     adminId: data.adminId || null,
   };
-  if (!messageDto.roomId || !messageDto.userId) {
-    throw new Error("roomId와 userId는 필수입니다.");
+  
+  // roomId는 항상 필수
+  if (!messageDto.roomId) {
+    throw new Error("roomId는 필수입니다.");
+  }
+  
+  // sender에 따라 userId 또는 adminId 필수
+  if (messageDto.sender === "USER" && !messageDto.userId) {
+    throw new Error("일반 사용자는 userId가 필수입니다.");
+  }
+  if (messageDto.sender === "ADMIN" && !messageDto.adminId) {
+    throw new Error("관리자는 adminId가 필수입니다.");
   }
   
   const response = await api.post("/api/chating/message/text", messageDto);
@@ -30,6 +45,7 @@ export const sendTextMessage = async (data) => {
 };
 
 // 이미지 메시지 전송
+// 백엔드 인증/인가 강화: sender에 따라 userId 또는 adminId 필수
 export const sendImageMessage = async (data) => {
   const messageDto = {
     roomId: data.roomId,
@@ -41,11 +57,23 @@ export const sendImageMessage = async (data) => {
     adminId: data.adminId || null,
   };
   
+  if (!messageDto.roomId) {
+    throw new Error("roomId는 필수입니다.");
+  }
+  
+  if (messageDto.sender === "USER" && !messageDto.userId) {
+    throw new Error("일반 사용자는 userId가 필수입니다.");
+  }
+  if (messageDto.sender === "ADMIN" && !messageDto.adminId) {
+    throw new Error("관리자는 adminId가 필수입니다.");
+  }
+  
   const response = await api.post("/api/chating/message/image", messageDto);
   return response.data;
 };
 
 // 파일 메시지 전송
+// 백엔드 인증/인가 강화: sender에 따라 userId 또는 adminId 필수
 export const sendFileMessage = async (data) => {
   const messageDto = {
     roomId: data.roomId,
@@ -56,6 +84,17 @@ export const sendFileMessage = async (data) => {
     userId: data.userId,
     adminId: data.adminId || null,
   };
+  
+  if (!messageDto.roomId) {
+    throw new Error("roomId는 필수입니다.");
+  }
+  
+  if (messageDto.sender === "USER" && !messageDto.userId) {
+    throw new Error("일반 사용자는 userId가 필수입니다.");
+  }
+  if (messageDto.sender === "ADMIN" && !messageDto.adminId) {
+    throw new Error("관리자는 adminId가 필수입니다.");
+  }
   
   const response = await api.post("/api/chating/message/file", messageDto);
   return response.data;
@@ -73,6 +112,32 @@ export const getAdminChatList = async (adminId = null) => {
 // 채팅방의 메시지 목록 조회
 export const getChatMessages = async (roomId) => {
   const response = await api.get(`/api/chating/messages?roomId=${roomId}`);
+  return response.data;
+};
+
+// 채팅방 접근 권한 검증
+export const validateChatRoomAccess = async (roomId) => {
+  try {
+    // 메시지 조회 API를 통해 접근 권한 검증 (403 에러 시 접근 불가)
+    await api.get(`/api/chating/messages?roomId=${roomId}`);
+    return true;
+  } catch (error) {
+    if (error.response?.status === 403 || error.response?.status === 404) {
+      return false;
+    }
+    throw error;
+  }
+};
+
+// 배송문의 안내 메시지 전송
+export const sendDeliveryInquiryMessage = async (roomId) => {
+  const response = await api.post(`/api/chating/message/delivery-inquiry?roomId=${roomId}`);
+  return response.data;
+};
+
+// 교환/반품 안내 메시지 전송
+export const sendExchangeReturnMessage = async (roomId) => {
+  const response = await api.post(`/api/chating/message/exchange-return?roomId=${roomId}`);
   return response.data;
 };
 
