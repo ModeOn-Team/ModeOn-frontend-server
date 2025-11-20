@@ -8,6 +8,8 @@ export const MembershipService = {
       const data = response.data;
 
       return {
+        userId: data.userId,
+        username: data.username,
         level: data.level || "WELCOME",
         totalSpent: Number(data.totalSpent) || 0,
         lastUpdated: data.lastUpdated || null,

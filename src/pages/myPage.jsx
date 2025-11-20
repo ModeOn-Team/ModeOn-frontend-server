@@ -9,14 +9,15 @@ import ChatListPage from "./ChatListPage";
 // import Reviews from "../components/mypage/Reviews";
 
 const MyPage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("cart");
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+
   useEffect(() => {
     const tab = searchParams.get("tab");
     if (tab) setActiveTab(tab);
   }, [searchParams]);
-  
+
 
   const tabs = [
     { id: "cart", label: "장바구니" },
@@ -30,7 +31,7 @@ const MyPage = () => {
   ];
 
   const handleMembership = () => {
-    navigate("/mypage/membership/1");
+    navigate("/mypage/membership");
   };
 
   return (

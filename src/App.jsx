@@ -145,11 +145,11 @@ export default function App() {
         />
         <Route
           path="/mypage/membership"
-          element={isAuthenticated ? <MembershipLevelPage /> : <Navigate to="/auth" replace />}
+          element={isAuthenticated ? <MembershipDetailPage /> : <Navigate to="/auth" replace />}
         />
         <Route
-          path="/mypage/membership/:id"
-          element={isAuthenticated ? <MembershipDetailPage /> : <Navigate to="/auth" replace />}
+          path="/mypage/membership/levels"
+          element={isAuthenticated ? <MembershipLevelPage /> : <Navigate to="/auth" replace />}
         />
         <Route path="/mypage/point" element={<PointPage />} />
         <Route path="/mypage/coupon" element={<CouponPage />} />

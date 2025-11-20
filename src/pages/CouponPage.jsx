@@ -118,30 +118,50 @@ function CouponPage() {
               {benefitCoupons.map((coupon) => (
                 <div
                   key={coupon.couponId}
-                  className="p-4 bg-white border rounded-lg flex justify-between items-center"
+                  className="p-4 bg-white border rounded-lg"
                 >
-                  <div>
-                    <p className="font-semibold">{coupon.name}</p>
-                    <p className="text-sm text-gray-600">
-                      유효기간: ~{" "}
-                      {new Date(coupon.expiresAt).toLocaleDateString("ko-KR")}
-                    </p>
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="font-semibold text-lg">{coupon.name}</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        유효기간: ~{" "}
+                        {new Date(coupon.expiresAt).toLocaleDateString("ko-KR")}
+                      </p>
+                    </div>
+                    {coupon.isUsed && (
+                      <span className="text-green-600 font-medium text-sm">
+                        사용 완료
+                      </span>
+                    )}
                   </div>
 
-                  {/* 발급 여부 */}
-                  {coupon.isUsed ? (
-                    <span className="text-green-600 font-medium">
-                      사용 완료
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => handleIssue(coupon.couponId)}
-                      disabled={issuing === coupon.couponId}
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                    >
-                      {issuing === coupon.couponId ? "발급중..." : "발급받기"}
-                    </button>
-                  )}
+                  {/* 상세 정보 */}
+                  <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-500">할인 타입:</span>{" "}
+                        <span className="font-medium">
+                          {coupon.type === "PERCENT" ? "퍼센트 할인" :
+                           coupon.type === "FREE_SHIPPING" ? "무료배송" : "정액 할인"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">할인율/금액:</span>{" "}
+                        <span className="font-medium text-red-600">
+                          {coupon.type === "PERCENT" ? `${coupon.value}%` :
+                           coupon.type === "FREE_SHIPPING" ? "무료" : `${coupon.value}원`}
+                        </span>
+                      </div>
+                      {coupon.minPurchaseAmount > 0 && (
+                        <div className="col-span-2">
+                          <span className="text-gray-500">최소 구매금액:</span>{" "}
+                          <span className="font-medium">
+                            {coupon.minPurchaseAmount.toLocaleString()}원
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -158,26 +178,47 @@ function CouponPage() {
             {coupons.map((coupon) => (
               <div
                 key={coupon.couponId}
-                className="p-6 bg-white border rounded-xl shadow-sm"
+                className="p-6 bg-white border rounded-xl shadow-sm hover:shadow-md transition-shadow"
               >
-                <h3 className="font-bold text-lg mb-2">{coupon.name}</h3>
-
-                <p className="text-sm text-gray-500 mb-3">
-                  ~ {new Date(coupon.expiresAt).toLocaleDateString("ko-KR")}
-                </p>
-
-                <div className="flex justify-between items-center">
-                  {coupon.isUsed ? (
-                    <span className="text-sm text-green-600">사용 완료</span>
-                  ) : (
-                    <button
-                      onClick={() => handleIssue(coupon.couponId)}
-                      disabled={issuing === coupon.couponId}
-                      className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                    >
-                      {issuing === coupon.couponId ? "..." : "발급"}
-                    </button>
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="font-bold text-lg">{coupon.name}</h3>
+                  {coupon.isUsed && (
+                    <span className="text-xs text-green-600 font-medium">사용 완료</span>
                   )}
+                </div>
+
+                {/* 상세 정보 */}
+                <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">타입:</span>
+                      <span className="font-medium">
+                        {coupon.type === "PERCENT" ? "퍼센트 할인" :
+                         coupon.type === "FREE_SHIPPING" ? "무료배송" : "정액 할인"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">할인:</span>
+                      <span className="font-bold text-red-600">
+                        {coupon.type === "PERCENT" ? `${coupon.value}%` :
+                         coupon.type === "FREE_SHIPPING" ? "무료" : `${coupon.value}원`}
+                      </span>
+                    </div>
+                    {coupon.minPurchaseAmount > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">최소금액:</span>
+                        <span className="font-medium">
+                          {coupon.minPurchaseAmount.toLocaleString()}원
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex justify-between pt-2 border-t">
+                      <span className="text-gray-500">유효기간:</span>
+                      <span className="font-medium">
+                        ~ {new Date(coupon.expiresAt).toLocaleDateString("ko-KR")}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}

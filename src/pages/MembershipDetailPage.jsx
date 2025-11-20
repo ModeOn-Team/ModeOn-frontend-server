@@ -6,6 +6,7 @@ import MainLayout from "../components/layout/MainLayout.jsx";
 function MembershipDetailPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -118,13 +119,13 @@ function MembershipDetailPage() {
     },
     {
       label: "쿠폰",
-      value: "0개",
+      value: `${userInfo.couponCount || 0}개`,
       color: "#10b981",
       onClick: () => navigate("/mypage/coupon"),
     },
     {
       label: "리뷰",
-      value: "0개",
+      value: `${userInfo.reviewCount || 0}개`,
       color: "#6366f1",
       onClick: () => navigate("/mypage/reviews"),
     },
