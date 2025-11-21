@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
 import Category from "../components/admin/Category";
+//
+import AdminCategory from "../components/admin/AdminCategory.jsx"
 import Product from "../components/admin/Product";
 import AdminChatListPage from "./AdminChatListPage";
 import Stock from "../components/admin/Stock";
@@ -84,7 +86,7 @@ const AdminPage = () => {
         </aside>
 
         <main className="flex-1 p-10">
-          {activeTab === "category" && <Category />}
+          {activeTab === "category" && <AdminCategory />}
           {activeTab === "product" && <Product />}
           {activeTab === "stock" && <Stock />}
           {activeTab === "chat" && <AdminChatListPage />}
