@@ -35,7 +35,7 @@ const ProductForm = ({ isOpen, onClose, categories }) => {
   };
 
   const renderDepthColumn = (depthCategories, selectedId, setSelected) => (
-    <div className="flex flex-col flex-1 p-2 border-r border-gray-300">
+    <div className="flex flex-col flex-1 p-2 border-r border-gray-300 min-h-[300px] max-h-[300px] overflow-y-auto">
       {depthCategories.map((cat) => {
         const isActive = selectedId === cat.id;
         return (
@@ -136,31 +136,56 @@ const ProductForm = ({ isOpen, onClose, categories }) => {
               setSelectedDepth1(id);
               setSelectedDepth2(null);
             })}
-            {renderDepthColumn(depth2Categories, selectedDepth2, setSelectedDepth2)}
+            {renderDepthColumn(
+              depth2Categories,
+              selectedDepth2,
+              setSelectedDepth2
+            )}
           </div>
 
           <div className="flex flex-col gap-2 mt-4">
             <label className="font-medium">Images</label>
-            <div className="text-sm font-medium">First image is Thumbnail</div>
             <div className="flex gap-2 flex-wrap">
-              {images.length > 0 && (
-                <div>
-                  <img
-                    src={images[0]}
-                    alt="Thumbnail"
-                    className="w-32 h-32 object-cover border mb-2"
-                  />
-                </div>
-              )}
+              {images.map((img, idx) => {
+                const isThumbnail = idx === 0;
+                return (
+                  <div key={idx} className="relative">
+                    <img
+                      src={img}
+                      alt={isThumbnail ? "Thumbnail" : `Detail ${idx}`}
+                      className={`object-cover border ${
+                        isThumbnail ? "w-32 h-32" : "w-24 h-24"
+                      }`}
+                    />
+                    {isThumbnail && (
+                      <div className="absolute top-1 left-1 bg-amber-600 text-white text-xs px-1 rounded">
+                        썸네일
+                      </div>
+                    )}
+                    {!isThumbnail && (
+                      <button
+                        type="button"
+                        className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1 rounded hover:bg-black"
+                        onClick={() => {
+                          const newImages = [...images];
+                          const temp = newImages[0];
+                          newImages[0] = newImages[idx];
+                          newImages[idx] = temp;
+                          setImages(newImages);
 
-              {images.slice(1).map((img, idx) => (
-                <img
-                  key={idx}
-                  src={img}
-                  alt={`Detail ${idx + 1}`}
-                  className="w-24 h-24 object-cover border"
-                />
-              ))}
+                          const newFiles = [...imageFiles];
+                          const tempFile = newFiles[0];
+                          newFiles[0] = newFiles[idx];
+                          newFiles[idx] = tempFile;
+                          setImageFiles(newFiles);
+                        }}
+                      >
+                        Set Thumbnail
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
 
               <label className="w-24 h-24 flex items-center justify-center border cursor-pointer text-gray-500 hover:bg-gray-100">
                 + Add
