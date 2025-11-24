@@ -3,12 +3,13 @@ import { useSearchParams } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
 import Category from "../components/admin/Category";
 //
-import AdminCategory from "../components/admin/AdminCategory.jsx"
+import AdminCategory from "../components/admin/AdminCategory.jsx";
 import Product from "../components/admin/Product";
 import AdminChatListPage from "./AdminChatListPage";
 import Stock from "../components/admin/Stock";
 import Delivery from "../components/admin/Delivery";
 import AdminRequestList from "../components/admin/AdminRequestList.jsx";
+import AdminNewProductPage from "./AdminNewProductPage.jsx";
 
 const AdminPage = () => {
   const [searchParams] = useSearchParams();
@@ -41,7 +42,7 @@ const AdminPage = () => {
             <button
               onClick={() => setActiveTab("product")}
               className={`text-left p-2 rounded ${
-                activeTab === "product"
+                activeTab.includes("product")
                   ? "bg-black text-white"
                   : "hover:bg-gray-200"
               }`}
@@ -87,7 +88,8 @@ const AdminPage = () => {
 
         <main className="flex-1 p-10">
           {activeTab === "category" && <AdminCategory />}
-          {activeTab === "product" && <Product />}
+          {activeTab === "product" && <Product setActiveTab={setActiveTab}/>}
+          {activeTab === "product new" && <AdminNewProductPage />}
           {activeTab === "stock" && <Stock />}
           {activeTab === "chat" && <AdminChatListPage />}
           {activeTab === "delivery" && <Delivery />}
