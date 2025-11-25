@@ -64,11 +64,7 @@ function HistoryDetail() {
           </span>
         )}
 
-        {info.adminResponseReason && (
-          <div className="px-4 py-2 mt-2 text-sm text-gray-700 border border-gray-200 rounded-lg bg-gray-50">
-            관리자 답변: {info.adminResponseReason}
-          </div>
-        )}
+  
 
         <div
           onClick={() => navigate(`/product/${info.productId}`)}

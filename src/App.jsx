@@ -28,6 +28,8 @@ import SearchProductPage from "./pages/searchProductPage.jsx";
 import OrderSheetPage from "./pages/OrderSheetPage.jsx";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import AdminRequestDetail from "./pages/AdminRequestDetail";
+import ReturnPage from "./pages/ReturnPage";
+import ReturnDetailPage from "./pages/ReturnDetailPage";
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
@@ -40,7 +42,9 @@ export default function App() {
           path="/"
           element={isAuthenticated ? <Home /> : <Navigate to="/auth" replace />}
         />
+
         <Route path="/oauth2/callback" element={<OAuth2Callback />} />
+
         <Route
           path="/auth"
           element={isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />}
@@ -136,6 +140,22 @@ export default function App() {
           }
         />
 
+        {/*  취소/반품/교환 리스트 페이지 */}
+        <Route
+          path="/mypage/returns"
+          element={
+            isAuthenticated ? <ReturnPage /> : <Navigate to="/auth" replace />
+          }
+        />
+
+        {/*  취소/반품/교환 상세 페이지 */}
+        <Route
+          path="/mypage/returns/:id"
+          element={
+            isAuthenticated ? <ReturnDetailPage /> : <Navigate to="/auth" replace />
+          }
+        />
+
         {/* 리뷰 */}
         <Route
           path="/review/write/:historyId"
@@ -163,6 +183,7 @@ export default function App() {
             isAuthenticated ? <Mypage /> : <Navigate to="/auth" replace />
           }
         />
+
         <Route
           path="/mypage/membership"
           element={
@@ -173,6 +194,7 @@ export default function App() {
             )
           }
         />
+
         <Route
           path="/mypage/membership/:id"
           element={
@@ -183,6 +205,7 @@ export default function App() {
             )
           }
         />
+
         <Route path="/mypage/point" element={<PointPage />} />
         <Route path="/mypage/coupon" element={<CouponPage />} />
         <Route path="/mypage/reviews" element={<ReviewPage />} />
