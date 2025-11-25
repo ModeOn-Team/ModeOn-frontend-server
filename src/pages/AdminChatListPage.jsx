@@ -24,7 +24,108 @@ const AdminChatListPage = () => {
       setError(null);
 
       const response = await getAdminChatList();
-      setChatRooms(response || []);
+      console.log("관리자 채팅 목록 API 응답:", response);
+      
+      const rooms = response || [];
+      console.log("받은 채팅방 개수:", rooms.length);
+      
+      // 첫 번째 채팅방의 구조 확인
+      if (rooms.length > 0) {
+        console.log("첫 번째 채팅방 구조:", JSON.stringify(rooms[0], null, 2));
+        console.log("첫 번째 채팅방 키 목록:", Object.keys(rooms[0]));
+      }
+      
+      // 가상/테스트 사용자 필터링
+      // 비어있는 채팅방 필터링은 제거 (백엔드에서 메시지가 있는 채팅방만 반환하므로)
+      const filteredRooms = rooms.filter((room) => {
+        // otherUser가 없으면 제외
+        if (!room.otherUser) {
+          console.log("필터링됨: otherUser 없음", {
+            roomId: room.roomId,
+            userId: room.userId,
+            keys: Object.keys(room)
+          });
+          return false;
+        }
+        
+        // username과 fullName이 모두 없으면 제외
+        if (!room.otherUser.username && !room.otherUser.fullName) {
+          console.log("필터링됨: username과 fullName 모두 없음", {
+            roomId: room.roomId,
+            userId: room.userId,
+            otherUser: room.otherUser
+          });
+          return false;
+        }
+        
+        // 가상 사용자 "modeon1101" 제외
+        if (room.otherUser.username === "modeon1101" || room.otherUser.fullName === "modeon1101") {
+          console.log("필터링됨: 가상 사용자 modeon1101", {
+            roomId: room.roomId,
+            userId: room.userId
+          });
+          return false;
+        }
+        
+        // 모든 조건을 통과하면 포함
+        console.log("채팅방 포함:", {
+          roomId: room.roomId,
+          userId: room.userId,
+          username: room.otherUser?.username || room.otherUser?.fullName,
+          lastMessage: room.lastMessage,
+          lastMessageTime: room.lastMessageTime
+        });
+        
+        return true;
+      });
+      
+      // 같은 사용자에 대한 중복 채팅방 제거 (userId 기준으로 가장 최근 채팅방만 유지)
+      const uniqueRooms = [];
+      const userRoomMap = new Map(); // userId -> 가장 최근 채팅방
+      
+      filteredRooms.forEach((room) => {
+        const userId = room.userId || room.otherUser?.id;
+        if (!userId) {
+          // userId가 없으면 그냥 추가
+          uniqueRooms.push(room);
+          return;
+        }
+        
+        const existingRoom = userRoomMap.get(userId);
+        if (!existingRoom) {
+          // 첫 번째 채팅방이면 추가
+          userRoomMap.set(userId, room);
+        } else {
+          // 기존 채팅방이 있으면 더 최근 메시지가 있는 채팅방으로 교체
+          const existingTime = existingRoom.lastMessageTime 
+            ? new Date(existingRoom.lastMessageTime).getTime() 
+            : 0;
+          const currentTime = room.lastMessageTime 
+            ? new Date(room.lastMessageTime).getTime() 
+            : 0;
+          
+          if (currentTime > existingTime) {
+            // 현재 채팅방이 더 최근이면 교체
+            userRoomMap.set(userId, room);
+          }
+        }
+      });
+      
+      // Map에서 배열로 변환
+      const finalRooms = Array.from(userRoomMap.values());
+      
+      // roomId 순서대로 정렬 (1, 2, 3... 순서)
+      finalRooms.sort((a, b) => {
+        const roomIdA = Number(a.roomId) || 0;
+        const roomIdB = Number(b.roomId) || 0;
+        return roomIdA - roomIdB;
+      });
+      
+      console.log("필터링 후 채팅방 개수:", filteredRooms.length);
+      console.log("중복 제거 후 채팅방 개수:", finalRooms.length);
+      console.log("정렬된 채팅방 roomId:", finalRooms.map(r => r.roomId));
+      
+      setChatRooms(finalRooms);
     } catch (err) {
       console.error("관리자 채팅 목록 로드 실패:", err);
       setError(err.response?.data?.message || "목록을 불러올 수 없습니다.");
@@ -94,10 +195,10 @@ const AdminChatListPage = () => {
                 onClick={() => handleSelectRoom(room.roomId)}
                 className="flex items-center gap-4 p-4 hover:bg-gray-50 cursor-pointer transition-colors"
               >
-                {room.profileImageUrl ? (
+                {room.otherUser?.profileImageUrl ? (
                   <img
-                    src={room.profileImageUrl}
-                    alt={room.username || room.fullName}
+                    src={room.otherUser.profileImageUrl}
+                    alt={room.otherUser?.username || room.otherUser?.fullName}
                     className="w-12 h-12 rounded-full object-cover"
                     onError={(e) => {
                       e.target.style.display = "none";
@@ -107,24 +208,25 @@ const AdminChatListPage = () => {
                 ) : null}
                 <div
                   className={`w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold ${
-                    room.profileImageUrl ? "hidden" : ""
+                    room.otherUser?.profileImageUrl ? "hidden" : ""
                   }`}
                 >
-                  {(room.username || room.fullName)?.[0]?.toUpperCase() || "?"}
+                  {(room.otherUser?.username || room.otherUser?.fullName)?.[0]?.toUpperCase() || "?"}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <div>
                       <h3 className="font-semibold text-gray-800">
-                        {room.username || room.fullName}
+                        {room.otherUser?.username || room.otherUser?.fullName || "사용자"}
                       </h3>
-                      <p className="text-xs text-gray-500">ID: {room.userId}</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-xs text-gray-500">
-                        {formatRelativeTime(room.lastMessageTime)}
-                      </span>
+                      {room.lastMessageTime && (
+                        <span className="text-xs text-gray-500">
+                          {formatRelativeTime(room.lastMessageTime)}
+                        </span>
+                      )}
                       {room.unreadCount > 0 && (
                         <span className="block mt-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full ml-auto w-fit">
                           {room.unreadCount}
@@ -133,9 +235,11 @@ const AdminChatListPage = () => {
                     </div>
                   </div>
 
-                  <p className="text-sm text-gray-600 truncate">
-                    {room.lastMessage}
-                  </p>
+                  {room.lastMessage && (
+                    <p className="text-sm text-gray-600 truncate">
+                      {room.lastMessage}
+                    </p>
+                  )}
                 </div>
               </div>
             ))

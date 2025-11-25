@@ -29,7 +29,6 @@ export const ProductService = {
       pageSize,
     } = ProductSearchForm;
 
-    console.log(gender);
     const query = new URLSearchParams();
     if (gender) query.append("gender", gender);
     if (categoryName) query.append("categoryName", categoryName);

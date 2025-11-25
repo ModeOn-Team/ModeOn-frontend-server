@@ -4,29 +4,32 @@ import api from "../lib/api";
 export const cartService = {
 
   getCartItems: async () => {
-    const res = await api.get("/cart");
+    const res = await api.get("/api/cart");
     return res.data;
   },
 
-  addItem: async (productId, count) => {
-    const res = await api.post("/cart", { productId, count });
+  addItem: async ({ productId, count, size, color }) => {
+    const res = await api.post("/api/cart", { productId, count, size, color });
     return res.data;
   },
+  
 
 
-  updateCount: async (productId, count) => {
-    const res = await api.patch(`/cart/${productId}?count=${count}`);
+  updateCount: async (cartId, count) => {
+    const res = await api.patch(`/api/cart/item/${cartId}?count=${count}`);
     return res.data;
   },
+  
 
-  removeItem: async (productId) => {
-    const res = await api.delete(`/cart/${productId}`);
+  removeItem: async (cartId) => {
+    const res = await api.delete(`/api/cart/item/${cartId}`); 
     return res.data;
   },
+  
 
  
   clearCart: async () => {
-    const res = await api.delete("/cart");
+    const res = await api.delete("/api/cart");
     return res.data;
   },
 };

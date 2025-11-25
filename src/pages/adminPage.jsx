@@ -1,11 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
 import Category from "../components/admin/Category";
+//
+import AdminCategory from "../components/admin/AdminCategory.jsx"
 import Product from "../components/admin/Product";
-import Stock from "../components/admin/Stock"
+import AdminChatListPage from "./AdminChatListPage";
+import Stock from "../components/admin/Stock";
+import Delivery from "../components/admin/Delivery";
+import AdminRequestList from "../components/admin/AdminRequestList.jsx";
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState("category");
+  const [searchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get("tab") || "category";
+  const [activeTab, setActiveTab] = useState(tabFromUrl);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   return (
     <MainLayout>
@@ -43,13 +58,40 @@ const AdminPage = () => {
             >
               재고 관리
             </button>
+            <button
+              onClick={() => setActiveTab("chat")}
+              className={`text-left p-2 rounded ${activeTab === "chat"}`}
+            >
+              채팅
+            </button>
+
+            <button
+              onClick={() => setActiveTab("delivery")}
+              className={`text-left p-2 rounded ${activeTab === "delivery"}`}
+            >
+              배송 관리
+            </button>
+
+            <button
+              onClick={() => setActiveTab("requests")}
+              className={`text-left p-2 rounded ${
+                activeTab === "requests"
+                  ? "bg-black text-white"
+                  : "hover:bg-gray-200"
+              }`}
+            >
+              교환/환불 요청 관리
+            </button>
           </nav>
         </aside>
 
         <main className="flex-1 p-10">
-          {activeTab === "category" && <Category />}
+          {activeTab === "category" && <AdminCategory />}
           {activeTab === "product" && <Product />}
           {activeTab === "stock" && <Stock />}
+          {activeTab === "chat" && <AdminChatListPage />}
+          {activeTab === "delivery" && <Delivery />}
+          {activeTab === "requests" && <AdminRequestList />}
         </main>
       </div>
     </MainLayout>

@@ -27,7 +27,7 @@ const ProductCard = ({ product, ProductDelete, onRefresh }) => {
       if (onRefresh) await onRefresh();
     } catch (error) {
       console.error(error);
-      alert("재고 변경 중 오류가 발생했습니다.");
+      alert("상품 삭제 중 오류가 발생했습니다.");
     }
   };
 

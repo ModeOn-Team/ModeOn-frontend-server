@@ -44,7 +44,6 @@ const ProductVariantModal = ({ product, onClose }) => {
         onClose();
       }
     } catch (err) {
-      console.log(err);
       alert("서버 오류가 발생했습니다.");
     }
   };

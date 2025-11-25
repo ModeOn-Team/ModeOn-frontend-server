@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useProductStore from "../store/ProductStore";
 import MainLayout from "../components/layout/MainLayout";
 import ProductDetailSide from "../components/product/ProductDetailSide";
@@ -8,6 +8,7 @@ import ProductDetailMain from "../components/product/ProductDetailMain";
 const ProductDetailPage = () => {
   const { id } = useParams();
   const { fetchProductById, selectedProduct, loading } = useProductStore();
+
 
   useEffect(() => {
     fetchProductById(id);
@@ -22,17 +23,15 @@ const ProductDetailPage = () => {
   }
 
   const { category, detailImages, gender, name, price, description, variants, wishList  } = selectedProduct;
-  console.log("selectedProduct:", selectedProduct);
 
   return (
     <MainLayout>
       <div className="flex py-10 px-40 gap-10">
-        {/* 메인 이미지 영역 */}
+     
         <div className="w-2/3">
           <ProductDetailMain name={name} detailImages={detailImages}/>
         </div>
 
-        {/* 오른쪽 사이드 영역 (sticky 적용) */}
         <div className="w-1/3">
           <div className="sticky top-34 flex flex-col gap-3">
             <ProductDetailSide
@@ -48,6 +47,8 @@ const ProductDetailPage = () => {
           </div>
         </div>
       </div>
+
+
     </MainLayout>
   );
 };

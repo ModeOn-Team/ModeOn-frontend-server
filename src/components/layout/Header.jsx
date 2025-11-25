@@ -76,17 +76,22 @@ const Header = () => {
           </div>
           {user ? (
             <>
+              <div
+                onClick={() => navigate("/mypage")}
+                className="cursor-pointer"
+              >
+                My Page
+              </div>
               {user.role === "ROLE_ADMIN" && (
                 <div
-                  onClick={() => navigate(import.meta.env.VITE_ADMIN_PAGE_URL)}
+                  onClick={() =>
+                    navigate(import.meta.env.VITE_ADMIN_PAGE_URL || "/admin")
+                  }
                   className="cursor-pointer"
                 >
                   Admin Page
                 </div>
               )}
-              <div onClick={handleMypage} className="cursor-pointer">
-                MyPage
-              </div>
               <div onClick={handleLogout} className="cursor-pointer">
                 LOGOUT
               </div>

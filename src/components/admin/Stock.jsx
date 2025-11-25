@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState } from "react";
 import useAdminStore from "../../store/adminStore";
 import useProductStore from "../../store/ProductStore";
 import StockList from "./StockList";
@@ -10,27 +10,28 @@ const Stock = () => {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  const loadPage = (pageNumber) => {
     setLoading(true);
-    fetchProducts(page, page > 0).finally(() => setLoading(false));
-  }, [page]);
+    fetchProducts(pageNumber)
+      .finally(() => setLoading(false))
+      .then(() => setPage(pageNumber));
+  };
 
-  const observer = useRef();
-  const lastElementRef = useCallback(
-    (node) => {
-      if (loading) return;
-      if (observer.current) observer.current.disconnect();
+  useEffect(() => {
+    loadPage(0);
+  }, []);
 
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && page + 1 < totalPages) {
-          setPage((prev) => prev + 1);
-        }
-      });
+  const handlePrev = () => {
+    if (page > 0) loadPage(page - 1);
+  };
 
-      if (node) observer.current.observe(node);
-    },
-    [loading, totalPages, page]
-  );
+  const handleNext = () => {
+    if (page + 1 < totalPages) loadPage(page + 1);
+  };
+
+  const handlePageClick = (pageNumber) => {
+    loadPage(pageNumber);
+  };
 
   return (
     <div>
@@ -39,18 +40,45 @@ const Stock = () => {
       <StockList
         products={products}
         ProductVariantUpdate={ProductVariantUpdate}
-        onRefresh={() => setPage(0)}
-        lastElementRef={lastElementRef}
+        onRefresh={() => loadPage(page)}
       />
+
+      {/* 페이지네이션 */}
+      <div className="flex justify-center items-center gap-2 mt-6">
+        <button
+          onClick={handlePrev}
+          disabled={page === 0}
+          className="px-3 py-1 rounded border bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+        >
+          Prev
+        </button>
+
+        {Array.from({ length: totalPages }, (_, idx) => (
+          <button
+            key={idx}
+            onClick={() => handlePageClick(idx)}
+            className={`px-3 py-1 rounded border ${
+              idx === page
+                ? "bg-black text-white"
+                : "bg-gray-100 hover:bg-gray-200"
+            }`}
+          >
+            {idx + 1}
+          </button>
+        ))}
+
+        <button
+          onClick={handleNext}
+          disabled={page + 1 >= totalPages}
+          className="px-3 py-1 rounded border bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
 
       {loading && (
         <div className="text-center py-6 text-gray-500 animate-pulse">
           Loading...
-        </div>
-      )}
-      {!loading && page + 1 >= totalPages && products.length > 0 && (
-        <div className="text-center py-6 text-gray-400 text-sm italic">
-          마지막 페이지입니다
         </div>
       )}
     </div>

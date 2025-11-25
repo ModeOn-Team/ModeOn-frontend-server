@@ -5,7 +5,6 @@ import { wishListService } from "../../services/wishList";
 const ProductPageCard = ({ product }) => {
   const navigate = useNavigate();
 
-  console.log("product",product);
   const [isWish, setIsWish] = useState(product.wishList);
   const [wishCount, setWishCount] = useState(product.wishListCount || 0);
 

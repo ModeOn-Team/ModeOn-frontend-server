@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { cartService } from "../services/cartService";
-import "./CartPage.css";
 import { loadTossPayments } from "@tosspayments/payment-sdk";
-import MainLayout from "../components/layout/MainLayout";
 
 function CartPage() {
   const [cartItems, setCartItems] = useState([]);
@@ -20,168 +18,195 @@ function CartPage() {
 
   useEffect(() => {
     loadCart();
+
+    // 결제 완료 후 장바구니 갱신을 위한 이벤트 리스너
+    const handleCartUpdate = () => {
+      loadCart();
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdate);
+
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+    };
   }, []);
 
-  //전체선택
+  // 전체 선택
   const handleSelectAll = () => {
-    if (selectAll)
-      setSelectedItems(
-        []
-      ); //만약 전체선택이면(true) 빈배열로 바꾼다 (모든 선택해제로 바꿈)
-    else setSelectedItems(cartItems.map((item) => item.id)); //반대경우 전체선택으로
+    if (selectAll) setSelectedItems([]);
+    else setSelectedItems(cartItems.map((item) => item.id));
     setSelectAll(!selectAll);
   };
 
-  //개별선택
+  // 개별 선택
   const handleSelectItem = (itemId) => {
-    if (selectedItems.includes(itemId)) {
-      setSelectedItems(selectedItems.filter((id) => id !== itemId));
-    } else {
-      setSelectedItems([...selectedItems, itemId]);
-    }
+    setSelectedItems((prev) =>
+      prev.includes(itemId)
+        ? prev.filter((id) => id !== itemId)
+        : [...prev, itemId]
+    );
   };
 
-  //수량변경
+  // 수량 변경
   const handleCountChange = async (item, delta) => {
-    const newCount = Math.max(item.count + delta, 1); //1보다는 항상 크게
-    await cartService.updateCount(item.product.id, newCount);
+    const newCount = Math.max(item.count + delta, 1);
+    await cartService.updateCount(item.id, newCount);
     loadCart();
   };
 
+  // 선택 삭제
   const handleRemoveSelected = async () => {
-    for (const itemId of selectedItems) {
-      const item = cartItems.find((i) => i.id === itemId);
-      await cartService.removeItem(item.product.id);
+    for (const cartItemId of selectedItems) {
+      await cartService.removeItem(cartItemId);
     }
     setSelectedItems([]);
     setSelectAll(false);
     loadCart();
   };
 
-  //결제
-  const handlePayment = async () => {
+ 
+  const handlePayment = () => {
     const selectedProducts = cartItems.filter((item) =>
       selectedItems.includes(item.id)
     );
+  
+    if (selectedProducts.length === 0)
+      return alert("결제할 상품을 선택하세요.");
+  
 
-    if (selectedProducts.length === 0) {
-      alert("결제할 상품을 선택하세요.");
-      return;
-    }
-
-    const totalAmount = selectedProducts.reduce(
-      (sum, item) => sum + (item.product?.price || 0) * item.count,
-      0
-    );
-
-    const tossPayments = await loadTossPayments(
-      import.meta.env.VITE_TOSS_CLIENT_KEY
-    );
-
-    const orderId = "order_" + Date.now();
-
-    await tossPayments.requestPayment("카드", {
-      amount: totalAmount,
-      orderId: orderId,
-      orderName: selectedProducts.map((p) => p.product?.name).join(", "),
-      successUrl: `${window.location.origin}/success`,
-      failUrl: `${window.location.origin}/fail`,
-    });
+    const normalizedItems = selectedProducts.map((item) => ({
+      id: item.id,
+      size: item.size,
+      color: item.color,
+      count: item.count,               
+      productPrice: item.productPrice,  
+      productName: item.productName     
+    }));
+  
+    const query = new URLSearchParams({
+      items: JSON.stringify(normalizedItems),
+      from: "cart",
+    }).toString();
+  
+    window.location.href = `/order?${query}`;
   };
+  
 
-  //총액
+  
+  // 총액 계산
   const totalPrice = cartItems
     .filter((item) => selectedItems.includes(item.id))
-    .reduce((sum, item) => sum + (item.product?.price || 0) * item.count, 0);
+    .reduce((sum, item) => sum + item.productPrice * item.count, 0);
+
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
   return (
-    <MainLayout>
-      <div className="cart-page">
-        <div className="cart-header">
-          <h1>장바구니</h1>
-        </div>
-
-        <div className="cart-controls">
-          <button onClick={handleSelectAll}>
+    <div className="max-w-screen-xl mx-auto py-10 space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">장바구니</h1>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleSelectAll}
+            className="text-sm border px-3 py-1 rounded-md hover:bg-gray-100"
+          >
             {selectAll ? "전체 해제" : "전체 선택"}
           </button>
           <button
             onClick={handleRemoveSelected}
             disabled={selectedItems.length === 0}
-            className="delete-btn"
+            className="text-sm border px-3 py-1 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
           >
             선택 삭제
           </button>
         </div>
-        {cartItems.length === 0 ? (
-          <div className="empty-state">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/11329/11329060.png"
-              alt="empty"
-            />
-            <p>장바구니가 비어 있습니다</p>
-          </div>
-        ) : (
-          <>
-            <div className="cart-list">
-              {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className={`cart-item ${
-                    selectedItems.includes(item.id) ? "selected" : ""
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.includes(item.id)}
-                    onChange={() => handleSelectItem(item.id)}
-                  />
-                  <img
-                    src={
-                      item.product?.imageUrl ||
-                      "https://cdn-icons-png.flaticon.com/512/7596/7596292.png"
-                    }
-                    alt={item.product?.name}
-                  />
-                  <div className="info">
-                    <h3>{item.product?.name}</h3>
-                    <p className="price">
-                      {(item.product?.price || 0).toLocaleString()}원
-                    </p>
-                    <div className="quantity">
-                      <button onClick={() => handleCountChange(item, -1)}>
-                        -
-                      </button>
-                      <span>{item.count}</span>
-                      <button onClick={() => handleCountChange(item, +1)}>
-                        +
-                      </button>
-                    </div>
-                  </div>
-                  <div className="item-total">
-                    {(item.product?.price * item.count || 0).toLocaleString()}원
+      </div>
+
+      {cartItems.length === 0 ? (
+        <div className="text-center text-gray-500 py-24">
+          장바구니가 비어 있습니다 🛒
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-col bg-white rounded-2xl shadow-sm divide-y">
+            {cartItems.map((item) => (
+              <div key={item.id} className="flex items-center gap-6 p-4">
+                <input
+                  type="checkbox"
+                  checked={selectedItems.includes(item.id)}
+                  onChange={() => handleSelectItem(item.id)}
+                  className="w-4 h-4"
+                />
+
+                <img
+                  src={
+                    API_URL + item.productImage ||
+                    "https://cdn-icons-png.flaticon.com/512/7596/7596292.png"
+                  }
+                  alt={item.productName}
+                  className="w-24 h-24 object-cover rounded-lg border"
+                />
+
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium truncate">{item.productName}</h3>
+
+               
+                  <p className="text-sm text-gray-500">
+                    옵션: {item.size} / {item.color}
+                  </p>
+
+                  <p className="text-gray-500 mt-1">
+                    {item.productPrice.toLocaleString()}원
+                  </p>
+
+                  <div className="flex items-center gap-2 mt-3">
+                    <button
+                      onClick={() => handleCountChange(item, -1)}
+                      className="w-8 h-8 border rounded-md"
+                    >
+                      -
+                    </button>
+                    <span className="w-8 text-center">{item.count}</span>
+                    <button
+                      onClick={() => handleCountChange(item, +1)}
+                      className="w-8 h-8 border rounded-md"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
-              ))}
+
+                <div className="text-right">
+                  <div className="text-sm text-gray-500">합계</div>
+                  <div className="text-lg font-semibold">
+                    {(item.productPrice * item.count).toLocaleString()}원
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between pt-4">
+            <div className="text-gray-600">
+              선택된 상품{" "}
+              <span className="font-medium">{selectedItems.length}</span>개
             </div>
 
-            <div className="cart-footer">
-              <div className="summary">
-                <span>선택된 상품 {selectedItems.length}개</span>
-                <strong>{totalPrice.toLocaleString()}원</strong>
+            <div className="flex items-center gap-6">
+              <div className="text-xl font-semibold">
+                {totalPrice.toLocaleString()}원
               </div>
               <button
                 onClick={handlePayment}
                 disabled={selectedItems.length === 0}
-                className="checkout-btn"
+                className="bg-black text-white px-6 py-3 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 결제하기
               </button>
             </div>
-          </>
-        )}
-      </div>
-    </MainLayout>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 
