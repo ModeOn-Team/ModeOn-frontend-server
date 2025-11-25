@@ -1,10 +1,11 @@
+// src/pages/HistoryDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { historyService } from "../services/historyService";
 import MainLayout from "../components/layout/MainLayout";
 import api from "../lib/api";
 
-function HistoryDetail() {
+export default function HistoryDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -12,7 +13,6 @@ function HistoryDetail() {
   const [review, setReview] = useState(null);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-
   const buildUrl = (base, path) =>
     base.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
 
@@ -28,7 +28,6 @@ function HistoryDetail() {
         setReview(null);
       }
     };
-
     load();
   }, [id]);
 
@@ -64,8 +63,7 @@ function HistoryDetail() {
           </span>
         )}
 
-  
-
+        {/* 상품 정보 */}
         <div
           onClick={() => navigate(`/product/${info.productId}`)}
           className="bg-white p-8 rounded-3xl border shadow hover:shadow-lg transition flex gap-8 cursor-pointer"
@@ -90,9 +88,10 @@ function HistoryDetail() {
 
             <div className="space-y-1">
               {info.size && info.color && (
-                <p className="text-gray-600">옵션 : {info.size} / {info.color}</p>
+                <p className="text-gray-600">
+                  옵션 : {info.size} / {info.color}
+                </p>
               )}
-
               <p className="text-gray-600">수량 : {info.count}개</p>
 
               <p className="text-3xl font-bold text-gray-900">
@@ -118,7 +117,9 @@ function HistoryDetail() {
                     }`}
                   />
                   <span
-                    className={`${active ? "text-blue-600" : "text-gray-400"} text-xs`}
+                    className={`${
+                      active ? "text-blue-600" : "text-gray-400"
+                    } text-xs`}
                   >
                     {statusKorean[step]}
                   </span>
@@ -176,6 +177,7 @@ function HistoryDetail() {
 
         {/* 버튼 영역 */}
         <div className="flex justify-between items-center mt-10">
+          {/* 리뷰 */}
           <div>
             {review ? (
               <button
@@ -195,8 +197,27 @@ function HistoryDetail() {
           </div>
 
           <div className="flex gap-3">
+            {/* 요청 진행 중이면 차단 */}
+            {["REFUND_REQUEST", "EXCHANGE_REQUEST"].includes(
+              info.requestStatus
+            ) && (
+              <span className="px-3 py-2 text-sm text-red-600 font-semibold">
+                요청 처리 중입니다.
+              </span>
+            )}
+
+            {/* 요청이 아예 없을 때만 버튼 표시 */}
+            {!info.requestStatus && (
+              <button
+                onClick={() => navigate(`/orders/${id}/request`)}
+                className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+              >
+                교환 / 환불 요청하기
+              </button>
+            )}
+
             <button
-                onClick={() => navigate("/mypage?tab=orders")}
+              onClick={() => navigate("/mypage?tab=orders")}
               className="px-4 py-2 border border-gray-400 text-gray-700 rounded-lg hover:bg-gray-100 transition"
             >
               주문내역으로 돌아가기
@@ -214,5 +235,3 @@ function HistoryDetail() {
     </MainLayout>
   );
 }
-
-export default HistoryDetail;

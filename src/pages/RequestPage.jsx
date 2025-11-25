@@ -1,3 +1,4 @@
+// src/pages/RequestPage.jsx
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
@@ -9,13 +10,12 @@ export default function RequestPage() {
 
   const [info, setInfo] = useState(null);
 
-  
-  const [type, setType] = useState("REFUND"); 
+  const [type, setType] = useState("REFUND");
   const [reasonType, setReasonType] = useState("단순 변심");
   const [reasonDetail, setReasonDetail] = useState("");
 
-  const [images, setImages] = useState([]); // 실제 파일들
-  const [previews, setPreviews] = useState([]); // 미리보기 URL들
+  const [images, setImages] = useState([]);
+  const [previews, setPreviews] = useState([]);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
   const buildUrl = (base, path) =>
@@ -24,6 +24,17 @@ export default function RequestPage() {
   useEffect(() => {
     const load = async () => {
       const res = await api.get(`/api/history/${id}`);
+
+      // 진행 중 상태만 막기
+      if (
+        res.data.requestStatus === "REFUND_REQUEST" ||
+        res.data.requestStatus === "EXCHANGE_REQUEST"
+      ) {
+        alert("이미 요청이 진행 중입니다.");
+        navigate(`/orders/${id}`, { replace: true });
+        return;
+      }
+
       setInfo(res.data);
     };
     load();
@@ -31,23 +42,19 @@ export default function RequestPage() {
 
   if (!info) return null;
 
-  /* 이미지 선택  */
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-
     const merged = [...images, ...files];
 
     setImages(merged);
     setPreviews(merged.map((file) => URL.createObjectURL(file)));
   };
 
-  /* 개별 삭제 */
   const removeImage = (index) => {
     setImages(images.filter((_, i) => i !== index));
     setPreviews(previews.filter((_, i) => i !== index));
   };
 
-  /* 제출 */
   const handleSubmit = async () => {
     if (!reasonDetail.trim()) {
       alert("상세 사유를 입력해주세요.");
@@ -148,12 +155,11 @@ export default function RequestPage() {
           />
         </div>
 
-        {/* 이미지 업로드 */}
+        {/* 사진 첨부 */}
         <div>
           <p className="font-semibold mb-2">사진 첨부 (여러 장 가능)</p>
 
           <div className="flex flex-wrap gap-4">
-            {/* + 버튼 */}
             <label className="w-32 h-32 border rounded-xl flex items-center justify-center text-3xl cursor-pointer bg-gray-100 hover:bg-gray-200">
               +
               <input
@@ -165,7 +171,6 @@ export default function RequestPage() {
               />
             </label>
 
-            {/* 미리보기 */}
             {previews.map((src, idx) => (
               <div key={idx} className="relative w-32 h-32">
                 <img
@@ -183,7 +188,6 @@ export default function RequestPage() {
           </div>
         </div>
 
-        {/* 제출 버튼 */}
         <button
           onClick={handleSubmit}
           className="w-full bg-black text-white py-4 rounded-xl text-lg hover:bg-gray-900 transition"
@@ -191,7 +195,6 @@ export default function RequestPage() {
           {type === "REFUND" ? "환불 요청 제출" : "교환 요청 제출"}
         </button>
 
-        {/* 뒤로가기 */}
         <button
           onClick={() => navigate(`/orders/${id}`)}
           className="block text-center text-gray-500 pt-4 underline"

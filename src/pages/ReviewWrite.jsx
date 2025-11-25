@@ -13,7 +13,7 @@ function ReviewWrite() {
   const [images, setImages] = useState([]);       // 파일들
   const [previews, setPreviews] = useState([]);   // 미리보기 URL
 
-  /** 파일 추가 (+ 버튼) */
+  /** 파일 추가 */
   const handleFiles = (e) => {
     const files = Array.from(e.target.files);
     const merged = [...images, ...files];
@@ -22,7 +22,7 @@ function ReviewWrite() {
     setPreviews(merged.map((file) => URL.createObjectURL(file)));
   };
 
-  /** 이미지 개별 삭제 (X 버튼) */
+  /** 이미지 개별 삭제  */
   const removeImage = (index) => {
     const newFiles = images.filter((_, i) => i !== index);
     const newPreviews = previews.filter((_, i) => i !== index);
@@ -35,7 +35,7 @@ function ReviewWrite() {
     if (!content.trim()) return alert("리뷰 내용을 입력해주세요!");
 
     try {
-      //  리뷰 먼저 작성
+      //  리뷰  작성
       const formData = new FormData();
       formData.append(
         "request",

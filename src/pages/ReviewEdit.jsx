@@ -19,7 +19,7 @@ function ReviewEdit() {
   const buildUrl = (base, path) =>
     base.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
 
-  /** 기존 리뷰 로딩 */
+
   useEffect(() => {
     const load = async () => {
       try {
