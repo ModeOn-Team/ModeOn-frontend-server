@@ -138,7 +138,7 @@ function HistoryPage() {
                       </button>
                     )}
 
-                    {/* 🔥 교환/환불 버튼 조건 수정됨 */}
+                    {/*  교환/환불 버튼 조건 수정됨 */}
                     {statusKey === "DELIVERED" && !item.requestStatus && (
                       <button
                         onClick={() => navigate(`/orders/${item.id}/request`)}

@@ -1,4 +1,3 @@
-// src/pages/RequestPage.jsx
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
