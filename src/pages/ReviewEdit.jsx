@@ -7,8 +7,12 @@ function ReviewEdit() {
   const { reviewId } = useParams();
   const navigate = useNavigate();
 
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState("");
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -16,6 +20,10 @@ function ReviewEdit() {
         const res = await api.get(`/api/reviews/${reviewId}`);
         setRating(res.data.rating);
         setContent(res.data.content);
+
+        if (res.data.imageUrl) {
+          setPreview(`${API_URL}/${res.data.imageUrl}`);
+        }
       } catch (err) {
         console.error(err);
         alert("리뷰 정보를 불러오지 못했습니다.");
@@ -24,13 +32,30 @@ function ReviewEdit() {
     load();
   }, [reviewId]);
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setImage(file);
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleUpdate = async () => {
     if (!content.trim()) return alert("내용을 입력해주세요.");
 
     try {
-      await api.put(`/api/reviews/${reviewId}`, {
-        rating,
-        content,
+      const formData = new FormData();
+      formData.append(
+        "request",
+        new Blob([JSON.stringify({ rating, content })], {
+          type: "application/json",
+        })
+      );
+
+      if (image) formData.append("image", image);
+
+      await api.put(`/api/reviews/${reviewId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       alert("리뷰가 수정되었습니다!");
@@ -66,6 +91,25 @@ function ReviewEdit() {
           onChange={(e) => setContent(e.target.value)}
           className="w-full h-40 border p-4 rounded-xl bg-white shadow-sm"
         />
+
+        {/* 이미지 수정 */}
+        <div>
+          <label className="font-medium">이미지 변경:</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="block mt-2"
+          />
+
+          {preview && (
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-40 h-40 mt-4 rounded-xl object-cover border"
+            />
+          )}
+        </div>
 
         <div className="flex gap-4 pt-4">
           <button

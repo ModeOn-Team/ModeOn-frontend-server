@@ -9,11 +9,11 @@ function ReviewDetail() {
   const navigate = useNavigate();
 
   const [review, setReview] = useState(null);
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
   useEffect(() => {
     const load = async () => {
       try {
-
         const res = await api.get(`/api/reviews/${reviewId}`);
         setReview(res.data);
       } catch (err) {
@@ -22,7 +22,7 @@ function ReviewDetail() {
       }
     };
     load();
-  }, [reviewId]);  
+  }, [reviewId]);
 
   if (!review) return null;
 
@@ -46,6 +46,14 @@ function ReviewDetail() {
           <p className="text-gray-700 leading-relaxed whitespace-pre-line text-base">
             {review.content}
           </p>
+
+          {review.imageUrl && (
+            <img
+              src={`${API_URL}/${review.imageUrl}`}
+              alt="리뷰 이미지"
+              className="w-1/2 mt-4 rounded-xl object-cover shadow-sm"
+            />
+          )}
         </div>
 
         <div className="flex justify-end gap-3 pt-4">
@@ -81,7 +89,6 @@ function ReviewDetail() {
           >
             삭제하기
           </button>
-
         </div>
 
       </div>
