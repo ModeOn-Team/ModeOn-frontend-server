@@ -8,4 +8,11 @@ export default defineConfig({
   define: {
     global: "globalThis",
   },
+<<<<<<< HEAD
 });
+=======
+  server: {
+    https: false,
+  },
+})
+>>>>>>> main
