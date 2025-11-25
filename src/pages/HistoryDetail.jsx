@@ -11,6 +11,11 @@ function HistoryDetail() {
   const [info, setInfo] = useState(null);
   const [review, setReview] = useState(null);
 
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+  const buildUrl = (base, path) =>
+    base.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
+
   useEffect(() => {
     const load = async () => {
       const data = await historyService.getHistoryDetail(id);
@@ -65,15 +70,15 @@ function HistoryDetail() {
           </div>
         )}
 
-        {/* 상품 카드 */}
         <div
           onClick={() => navigate(`/product/${info.productId}`)}
           className="bg-white p-8 rounded-3xl border shadow hover:shadow-lg transition flex gap-8 cursor-pointer"
         >
           <img
             src={
-              info.productImage ||
-              "https://cdn-icons-png.flaticon.com/512/7596/7596292.png"
+              info.productImage
+                ? buildUrl(API_URL, info.productImage)
+                : "https://cdn-icons-png.flaticon.com/512/7596/7596292.png"
             }
             alt={info.productName}
             className="w-40 h-40 rounded-xl object-cover border hover:scale-105 transition"
@@ -117,9 +122,7 @@ function HistoryDetail() {
                     }`}
                   />
                   <span
-                    className={`${
-                      active ? "text-blue-600" : "text-gray-400"
-                    } text-xs`}
+                    className={`${active ? "text-blue-600" : "text-gray-400"} text-xs`}
                   >
                     {statusKorean[step]}
                   </span>
@@ -197,7 +200,7 @@ function HistoryDetail() {
 
           <div className="flex gap-3">
             <button
-              onClick={() => navigate("/orders")}
+                onClick={() => navigate("/mypage?tab=orders")}
               className="px-4 py-2 border border-gray-400 text-gray-700 rounded-lg hover:bg-gray-100 transition"
             >
               주문내역으로 돌아가기

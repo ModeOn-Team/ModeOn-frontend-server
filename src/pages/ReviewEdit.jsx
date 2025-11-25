@@ -7,52 +7,81 @@ function ReviewEdit() {
   const { reviewId } = useParams();
   const navigate = useNavigate();
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState("");
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null);
 
+  const [oldImages, setOldImages] = useState([]); // 기존 이미지 URL
+  const [newImages, setNewImages] = useState([]); // 새 이미지 file
+  const [newPreviews, setNewPreviews] = useState([]); // 새 이미지 미리보기
+
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+  const buildUrl = (base, path) =>
+    base.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
+
+  /** 기존 리뷰 로딩 */
   useEffect(() => {
     const load = async () => {
       try {
         const res = await api.get(`/api/reviews/${reviewId}`);
-        setRating(res.data.rating);
-        setContent(res.data.content);
+        const r = res.data;
 
-        if (res.data.imageUrl) {
-          setPreview(`${API_URL}/${res.data.imageUrl}`);
-        }
+        setRating(r.rating);
+        setContent(r.content);
+        setOldImages(r.imageUrls || []);
       } catch (err) {
         console.error(err);
-        alert("리뷰 정보를 불러오지 못했습니다.");
+        alert("리뷰 정보를 불러오는데 실패했습니다.");
       }
     };
     load();
   }, [reviewId]);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setImage(file);
-    if (file) {
-      setPreview(URL.createObjectURL(file));
-    }
+  /** 새 이미지 추가 */
+  const handleNewFiles = (e) => {
+    const files = Array.from(e.target.files);
+
+    const merged = [...newImages, ...files];
+    setNewImages(merged);
+
+    setNewPreviews(merged.map((f) => URL.createObjectURL(f)));
   };
 
-  const handleUpdate = async () => {
+  /** 기존 이미지 X 삭제 */
+  const removeOldImage = (index) => {
+    setOldImages(oldImages.filter((_, i) => i !== index));
+  };
+
+  /** 새 이미지 X 삭제 */
+  const removeNewImage = (index) => {
+    setNewImages(newImages.filter((_, i) => i !== index));
+    setNewPreviews(newPreviews.filter((_, i) => i !== index));
+  };
+
+  /** 제출 */
+  const handleSubmit = async () => {
     if (!content.trim()) return alert("내용을 입력해주세요.");
 
     try {
       const formData = new FormData();
+
       formData.append(
         "request",
-        new Blob([JSON.stringify({ rating, content })], {
-          type: "application/json",
-        })
+        new Blob(
+          [
+            JSON.stringify({
+              rating,
+              content,
+              imageUrls: oldImages, // 남길 기존 이미지들
+            }),
+          ],
+          { type: "application/json" }
+        )
       );
+      
+      // 새 이미지 업로드
+      newImages.forEach((img) => formData.append("images", img));
 
-      if (image) formData.append("image", image);
 
       await api.put(`/api/reviews/${reviewId}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -71,57 +100,100 @@ function ReviewEdit() {
       <div className="max-w-screen-md mx-auto py-14 space-y-8">
         <h2 className="text-2xl font-bold">리뷰 수정</h2>
 
+        {/* 별점 */}
         <div className="flex items-center gap-3">
-          <span className="font-medium">별점:</span>
+          <span className="font-medium">별점</span>
           <select
             value={rating}
             onChange={(e) => setRating(Number(e.target.value))}
-            className="border px-4 py-2 rounded-xl bg-white shadow-sm"
+            className="border px-3 py-2 rounded-xl"
           >
-            {[5, 4, 3, 2, 1].map((star) => (
-              <option key={star} value={star}>
-                {star}점
+            {[5, 4, 3, 2, 1].map((s) => (
+              <option key={s} value={s}>
+                {s}점
               </option>
             ))}
           </select>
         </div>
 
+        {/* 내용 */}
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="w-full h-40 border p-4 rounded-xl bg-white shadow-sm"
+          className="w-full h-40 border p-4 rounded-xl"
         />
 
-        {/* 이미지 수정 */}
+        {/* 기존 이미지 */}
         <div>
-          <label className="font-medium">이미지 변경:</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="block mt-2"
-          />
+          <p className="font-medium mb-2">기존 이미지</p>
+          <div className="flex flex-wrap gap-4">
+            {oldImages.length === 0 && (
+              <p className="text-gray-500 text-sm">기존 이미지 없음</p>
+            )}
 
-          {preview && (
-            <img
-              src={preview}
-              alt="Preview"
-              className="w-40 h-40 mt-4 rounded-xl object-cover border"
-            />
-          )}
+            {oldImages.map((img, idx) => (
+              <div key={idx} className="relative w-32 h-32">
+                <img
+                  src={buildUrl(API_URL, img)}
+                  className="w-full h-full rounded-xl object-cover border"
+                />
+                <button
+                  onClick={() => removeOldImage(idx)}
+                  className="absolute -top-2 -right-2 bg-black text-white w-7 h-7 rounded-full flex items-center justify-center text-sm"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="flex gap-4 pt-4">
+        {/* 새 이미지 */}
+        <div>
+          <p className="font-medium mb-2">새 이미지 추가</p>
+          <div className="flex flex-wrap gap-4">
+            {/* + 버튼 */}
+            <label className="w-32 h-32 border rounded-xl flex items-center justify-center text-3xl cursor-pointer bg-gray-100 hover:bg-gray-200">
+              +
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleNewFiles}
+                className="hidden"
+              />
+            </label>
+
+            {/* 새 미리보기 */}
+            {newPreviews.map((src, idx) => (
+              <div key={idx} className="relative w-32 h-32">
+                <img
+                  src={src}
+                  className="w-full h-full rounded-xl object-cover border"
+                />
+                <button
+                  onClick={() => removeNewImage(idx)}
+                  className="absolute -top-2 -right-2 bg-black text-white w-7 h-7 rounded-full flex items-center justify-center text-sm"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 버튼 */}
+        <div className="flex gap-4">
           <button
-            onClick={handleUpdate}
-            className="px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-900 transition"
+            onClick={handleSubmit}
+            className="bg-black text-white px-6 py-3 rounded-xl"
           >
             수정 완료
           </button>
 
           <button
             onClick={() => navigate(-1)}
-            className="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+            className="border px-6 py-3 rounded-xl hover:bg-gray-100"
           >
             취소
           </button>

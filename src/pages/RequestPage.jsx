@@ -9,14 +9,17 @@ export default function RequestPage() {
 
   const [info, setInfo] = useState(null);
 
-  // 선택 상태
-  const [type, setType] = useState("REFUND"); // REFUND or EXCHANGE
+  
+  const [type, setType] = useState("REFUND"); 
   const [reasonType, setReasonType] = useState("단순 변심");
   const [reasonDetail, setReasonDetail] = useState("");
 
-  // 이미지 업로드 상태
-  const [images, setImages] = useState([]);
-  const [previews, setPreviews] = useState([]);
+  const [images, setImages] = useState([]); // 실제 파일들
+  const [previews, setPreviews] = useState([]); // 미리보기 URL들
+
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+  const buildUrl = (base, path) =>
+    base.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
 
   useEffect(() => {
     const load = async () => {
@@ -28,56 +31,63 @@ export default function RequestPage() {
 
   if (!info) return null;
 
-  /* 이미지 선택 */
+  /* 이미지 선택  */
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setImages(files);
 
-    const previewsUrl = files.map((file) => URL.createObjectURL(file));
-    setPreviews(previewsUrl);
+    const merged = [...images, ...files];
+
+    setImages(merged);
+    setPreviews(merged.map((file) => URL.createObjectURL(file)));
   };
 
+  /* 개별 삭제 */
+  const removeImage = (index) => {
+    setImages(images.filter((_, i) => i !== index));
+    setPreviews(previews.filter((_, i) => i !== index));
+  };
+
+  /* 제출 */
   const handleSubmit = async () => {
-    if (!reasonDetail.trim()) return alert("상세 사유를 입력해주세요.");
-  
+    if (!reasonDetail.trim()) {
+      alert("상세 사유를 입력해주세요.");
+      return;
+    }
+
     try {
       const endpoint =
         type === "REFUND"
           ? `/api/history/${id}/refund`
           : `/api/history/${id}/exchange`;
-  
+
       const formData = new FormData();
       formData.append("reason", `${reasonType} - ${reasonDetail}`);
-  
+
       images.forEach((file) => {
         formData.append("images", file);
       });
-  
+
       await api.post(endpoint, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
+        headers: { "Content-Type": "multipart/form-data" },
       });
-  
+
       alert(type === "REFUND" ? "환불 요청 완료!" : "교환 요청 완료!");
       navigate("/mypage?tab=orders");
-
-
     } catch (err) {
       console.error(err);
       alert("요청 처리 중 오류가 발생했습니다.");
     }
   };
-  
 
   return (
     <MainLayout>
       <div className="max-w-screen-md mx-auto py-16 space-y-10">
-        
         <h2 className="text-3xl font-bold">교환 / 환불 요청</h2>
 
         {/* 상품 정보 */}
         <div className="flex gap-6 bg-white border rounded-2xl p-6 shadow">
           <img
-            src={info.productImage}
+            src={buildUrl(API_URL, info.productImage)}
             alt={info.productName}
             className="w-28 h-28 object-cover rounded-xl border"
           />
@@ -96,20 +106,18 @@ export default function RequestPage() {
           <div className="flex gap-4">
             <button
               onClick={() => setType("REFUND")}
-              className={`
-                px-5 py-2 rounded-lg border transition
-                ${type === "REFUND" ? "bg-black text-white" : "bg-gray-100"}
-              `}
+              className={`px-5 py-2 rounded-lg border transition ${
+                type === "REFUND" ? "bg-black text-white" : "bg-gray-100"
+              }`}
             >
               환불 요청
             </button>
 
             <button
               onClick={() => setType("EXCHANGE")}
-              className={`
-                px-5 py-2 rounded-lg border transition
-                ${type === "EXCHANGE" ? "bg-black text-white" : "bg-gray-100"}
-              `}
+              className={`px-5 py-2 rounded-lg border transition ${
+                type === "EXCHANGE" ? "bg-black text-white" : "bg-gray-100"
+              }`}
             >
               교환 요청
             </button>
@@ -138,33 +146,44 @@ export default function RequestPage() {
             value={reasonDetail}
             onChange={(e) => setReasonDetail(e.target.value)}
           />
-
-
         </div>
-                  {/* 이미지 업로드 */}
-                  <div className="space-y-2">
-            <p className="font-semibold text-sm">사진 첨부 (여러 장 가능)</p>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleImageChange}
-            />
+
+        {/* 이미지 업로드 */}
+        <div>
+          <p className="font-semibold mb-2">사진 첨부 (여러 장 가능)</p>
+
+          <div className="flex flex-wrap gap-4">
+            {/* + 버튼 */}
+            <label className="w-32 h-32 border rounded-xl flex items-center justify-center text-3xl cursor-pointer bg-gray-100 hover:bg-gray-200">
+              +
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            </label>
 
             {/* 미리보기 */}
-            {previews.length > 0 && (
-              <div className="grid grid-cols-3 gap-3 pt-2">
-                {previews.map((src, i) => (
-                  <img
-                    key={i}
-                    src={src}
-                    className="w-full h-24 object-cover rounded-lg border"
-                  />
-                ))}
+            {previews.map((src, idx) => (
+              <div key={idx} className="relative w-32 h-32">
+                <img
+                  src={src}
+                  className="w-full h-full rounded-xl object-cover border"
+                />
+                <button
+                  onClick={() => removeImage(idx)}
+                  className="absolute -top-2 -right-2 bg-black text-white w-7 h-7 rounded-full flex items-center justify-center text-sm"
+                >
+                  ×
+                </button>
               </div>
-            )}
+            ))}
           </div>
+        </div>
 
+        {/* 제출 버튼 */}
         <button
           onClick={handleSubmit}
           className="w-full bg-black text-white py-4 rounded-xl text-lg hover:bg-gray-900 transition"
@@ -172,13 +191,13 @@ export default function RequestPage() {
           {type === "REFUND" ? "환불 요청 제출" : "교환 요청 제출"}
         </button>
 
+        {/* 뒤로가기 */}
         <button
           onClick={() => navigate(`/orders/${id}`)}
           className="block text-center text-gray-500 pt-4 underline"
         >
-          뒤로가기
+          주문 상세로 돌아가기
         </button>
-
       </div>
     </MainLayout>
   );
