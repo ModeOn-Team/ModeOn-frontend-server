@@ -1,179 +1,176 @@
-const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "FREE"];
-const COLORS = [
-  { name: "WHITE", hex: "#FFFFFF" },
-  { name: "BLACK", hex: "#000000" },
-  { name: "GRAY", hex: "#808080" },
-  { name: "BEIGE", hex: "#F5F5DC" },
-  { name: "BROWN", hex: "#8B4513" },
-  { name: "NAVY", hex: "#000080" },
-  { name: "BLUE", hex: "#0000FF" },
-  { name: "SKY_BLUE", hex: "#87CEEB" },
-  { name: "GREEN", hex: "#008000" },
-  { name: "KHAKI", hex: "#78866B" },
-  { name: "YELLOW", hex: "#FFFF00" },
-  { name: "ORANGE", hex: "#FFA500" },
-  { name: "RED", hex: "#FF0000" },
-  { name: "PINK", hex: "#FFC0CB" },
-  { name: "PURPLE", hex: "#800080" },
-  { name: "IVORY", hex: "#FFFFF0" },
-  { name: "GOLD", hex: "#FFD700" },
-  { name: "SILVER", hex: "#C0C0C0" },
-];
+import { useEffect, useState } from "react";
 
 const ProductVariantForm = ({
-  selectedSizes, setSelectedSizes,
-  selectedColors, setSelectedColors,
-  variantList, setVariantList,
+  variantOptions,
+  selectedValues,
+  setSelectedValues,
+  variantList,
+  setVariantList,
 }) => {
-  const toggleSize = (s) => {
-    setSelectedSizes((prev) =>
-      prev.includes(s) ? prev.filter((i) => i !== s) : [...prev, s]
-    );
+  const [selectedGuideId, setSelectedGuideId] = useState(null);
+
+  useEffect(() => {
+    if (!variantOptions) return;
+
+    const initValues = {};
+    variantOptions.optionGuides.forEach((guide) => {
+      guide.standardPurchaseOptions.forEach((opt) => {
+        initValues[opt.optionId] = [];
+      });
+    });
+    setSelectedValues(initValues);
+    setSelectedGuideId(null);
+  }, [variantOptions, setSelectedValues]);
+
+  const handleGuideSelect = (guideId) => {
+    setSelectedGuideId(guideId);
   };
 
-  const toggleColor = (c) => {
-    setSelectedColors((prev) =>
-      prev.includes(c) ? prev.filter((i) => i !== c) : [...prev, c]
-    );
+  const toggleValue = (optionId, value) => {
+    setSelectedValues((prev) => ({
+      ...prev,
+      [optionId]: prev[optionId].includes(value)
+        ? prev[optionId].filter((v) => v !== value)
+        : [...prev[optionId], value],
+    }));
   };
-
-  const removeSize = (s) =>
-    setSelectedSizes((prev) => prev.filter((i) => i !== s));
-  const removeColor = (c) =>
-    setSelectedColors((prev) => prev.filter((i) => i !== c));
 
   const handleCreateList = () => {
-    if (selectedSizes.length === 0 || selectedColors.length === 0) {
-      alert("색상과 사이즈를 최소 1개 이상 선택하세요.");
+    if (!selectedGuideId) {
+      alert("옵션 가이드를 선택해주세요.");
       return;
     }
 
-    const combos = [];
-    selectedSizes.forEach((size) => {
-      selectedColors.forEach((color) => {
-        combos.push({ size, color, stock: 1 });
-      });
-    });
+    const guide = variantOptions.optionGuides.find(
+      (g) => g.guideId === selectedGuideId
+    );
+    if (!guide) return;
 
-    setVariantList(combos);
-  };
+    const groups = guide.standardPurchaseOptions.map(
+      (opt) => selectedValues[opt.optionId]
+    );
 
-  const handleSubmit = async () => {
-    if (selectedSizes.length === 0 || selectedColors.length === 0) {
-      alert("색상과 사이즈를 최소 1개 이상 선택하세요");
+    if (groups.some((g) => !g || g.length === 0)) {
+      alert("모든 옵션에서 최소 1개 이상 선택하세요.");
       return;
     }
 
-    const combinations = [];
-    selectedSizes.forEach((size) => {
-      selectedColors.forEach((color) => {
-        combinations.push({ size, color, stock });
-      });
-    });
+    const optionIds = guide.standardPurchaseOptions.map((o) => o.optionId);
 
-    try {
-      for (const combo of combinations) {
-      }
-      alert(`${combinations.length}개의 옵션이 생성되었습니다.`);
-    } catch (err) {
-      alert("서버 오류가 발생했습니다.");
-    }
+    const cartesian = groups.reduce(
+      (acc, cur) => acc.flatMap((a) => cur.map((b) => [...a, b])),
+      [[]]
+    );
+
+    console.log("guide:", guide);
+
+    const result = cartesian.map((combo) => ({
+      options: optionIds.map((id, index) => {
+        const opt = guide.standardPurchaseOptions.find(
+          (o) => o.optionId === Number(id)
+        );
+        return {
+          optionId: Number(id),
+          optionName: opt.optionName,
+          valueName: combo[index],
+        };
+      }),
+      guideId: selectedGuideId,
+      stock: 1,
+    }));
+
+    setVariantList(result);
   };
+
+  const selectedGuide = variantOptions?.optionGuides.find(
+    (g) => g.guideId === selectedGuideId
+  );
+
+  const dbOptionValues = ["색상", "사이즈"];
 
   return (
-    <div>
-      {/* 사이즈 선택 */}
-      <div className="mb-4">
-        <label className="font-semibold">사이즈 선택</label>
-        <div className="grid grid-cols-4 gap-2 mt-2">
-          {SIZES.map((s) => (
-            <button
-              key={s}
-              onClick={() => toggleSize(s)}
-              className={`border px-3 py-1 rounded ${
-                selectedSizes.includes(s)
-                  ? "bg-blue-500 text-white"
-                  : "bg-white"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+    <div className="p-4 border rounded-lg mt-5">
+      <h2 className="font-semibold mb-4 text-lg">상품 옵션 설정</h2>
 
-        {/* 선택된 사이즈 태그 */}
-        <div className="flex gap-2 flex-wrap mt-2">
-          {selectedSizes.map((s) => (
-            <span
-              key={s}
-              className="px-2 py-1 bg-blue-100 rounded flex items-center gap-1"
-            >
-              {s}
-              <button onClick={() => removeSize(s)} className="text-red-500">
-                ✕
-              </button>
-            </span>
-          ))}
-        </div>
+      <div className="mb-4">
+        <label className="font-semibold">판매옵션명 선택</label>
+        <select
+          className="border px-2 py-1 rounded w-full mt-2"
+          value={selectedGuideId || ""}
+          onChange={(e) => handleGuideSelect(Number(e.target.value))}
+        >
+          <option value="">-- 판매옵션 선택 --</option>
+          {variantOptions?.optionGuides.map((guide) => {
+            const label = guide.standardPurchaseOptions
+              .map((o) => o.optionName)
+              .join(" + ");
+
+            const isDisabled = !guide.standardPurchaseOptions.every((o) =>
+              dbOptionValues.includes(o.optionName)
+            );
+
+            return (
+              <option
+                key={guide.guideId}
+                value={guide.guideId}
+                disabled={isDisabled}
+              >
+                {label}
+              </option>
+            );
+          })}
+        </select>
       </div>
 
-      {/* 색상 선택 */}
-      <div className="mb-4">
-        <label className="font-semibold">색상 선택</label>
-        <div className="grid grid-cols-4 gap-2 mt-2">
-          {COLORS.map((c) => (
-            <button
-              key={c.name}
-              onClick={() => toggleColor(c.name)}
-              className={`border px-3 py-1 rounded ${
-                selectedColors.includes(c.name)
-                  ? "bg-green-500 text-white"
-                  : "bg-white"
-              }`}
-            >
-              {c.name}
-            </button>
-          ))}
-        </div>
+      {selectedGuide?.standardPurchaseOptions.map((opt) => (
+        <div key={opt.optionId} className="mb-4">
+          <label className="font-semibold">{opt.optionName}</label>
 
-        {/* 선택된 색상 태그 */}
-        <div className="flex gap-2 flex-wrap mt-2">
-          {selectedColors.map((c) => (
-            <span
-              key={c}
-              className="px-2 py-1 bg-green-100 rounded flex items-center gap-1"
-            >
-              {c}
-              <button onClick={() => removeColor(c)} className="text-red-500">
-                ✕
+          <div className="flex flex-wrap gap-2 mt-2">
+            {opt.optionValues.map((v) => (
+              <button
+                key={v.valueName}
+                className={`border px-2 py-1 rounded ${
+                  selectedValues[opt.optionId]?.includes(v.valueName)
+                    ? "bg-blue-500 text-white"
+                    : "bg-white"
+                }`}
+                onClick={() => toggleValue(opt.optionId, v.valueName)}
+              >
+                {v.valueName}
               </button>
-            </span>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      ))}
 
       <button
-        className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
         onClick={handleCreateList}
+        className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 mt-4"
       >
-        옵션별 재고 추가
+        옵션 조합 생성
       </button>
+
       {variantList.length > 0 && (
         <div className="mt-6">
-          <h3 className="font-semibold mb-2">생성된 옵션 목록</h3>
+          <h3 className="font-semibold mb-2">생성된 옵션 조합</h3>
           <table className="w-full border">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border px-2 py-1">사이즈</th>
-                <th className="border px-2 py-1">색상</th>
+                <th className="border px-2 py-1">옵션 내용</th>
                 <th className="border px-2 py-1">재고</th>
               </tr>
             </thead>
             <tbody>
               {variantList.map((v, i) => (
                 <tr key={i}>
-                  <td className="border px-2 py-1">{v.size}</td>
-                  <td className="border px-2 py-1">{v.color}</td>
+                  <td className="border px-2 py-1">
+                    {v.options.map((opt) => (
+                      <div key={opt.optionId}>
+                        {opt.optionName}: {opt.valueName}
+                      </div>
+                    ))}
+                  </td>
                   <td className="border px-2 py-1">
                     <input
                       type="number"
@@ -193,7 +190,7 @@ const ProductVariantForm = ({
           </table>
         </div>
       )}
-      </div>
+    </div>
   );
 };
 

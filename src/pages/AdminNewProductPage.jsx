@@ -1,12 +1,19 @@
 // AdminNewProductPage.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductForm from "../components/admin/ProductForm";
 import ProductVariantForm from "../components/admin/ProductVariantForm";
 import ProductImageForm from "../components/admin/ProductImageForm";
 import useAdminStore from "../store/adminStore";
+import useProductStore from "../store/ProductStore";
 
 const AdminNewProductPage = () => {
-  const { ProductCreate, ProductImage, ProductVariantCreate } = useAdminStore();
+  const { ProductCreate, ProductImage, ProductVariantCreateToNaver } =
+    useAdminStore();
+  const {
+    ProductUploadToNaver,
+    ProductImageUploadToNaver,
+    ProductVariantFetch,
+  } = useProductStore();
 
   // 1. 부모에서 모든 상태 관리
   const [productName, setProductName] = useState("");
@@ -19,11 +26,26 @@ const AdminNewProductPage = () => {
   const [images, setImages] = useState([]);
   const [imageFiles, setImageFiles] = useState([]);
 
-  const [selectedSizes, setSelectedSizes] = useState([]);
-  const [selectedColors, setSelectedColors] = useState([]);
+  const [optionValues, setOptionValues] = useState({});
+  const [optionMeta, setOptionMeta] = useState({});
+  const [selectedValues, setSelectedValues] = useState({});
   const [variantList, setVariantList] = useState([]);
 
   const [uploadToNaver, setUploadToNaver] = useState(false);
+
+  const [variantOptions, setVariantOptions] = useState(null);
+
+  useEffect(() => {
+    if (!selectedDepth2) return;
+
+    const fetchOptions = async () => {
+      const options = await ProductVariantFetch(selectedDepth2);
+      setVariantOptions(options);
+      setVariantList([]);
+    };
+
+    fetchOptions();
+  }, [selectedDepth2]);
 
   // 2. Save 버튼 클릭 시 처리
   const handleSaveProduct = async () => {
@@ -31,6 +53,11 @@ const AdminNewProductPage = () => {
 
     if (!categoryId) {
       alert("카테고리를 선택해주세요.");
+      return;
+    }
+
+    if (price % 10 !== 0) {
+      alert("가격은 10원 단위로 입력해주세요.");
       return;
     }
 
@@ -45,22 +72,32 @@ const AdminNewProductPage = () => {
       const res = await ProductCreate(product);
       const productId = res.id;
 
-      if (imageFiles.length > 0) {
-        const formData = new FormData();
-        formData.append("productId", String(productId));
-        imageFiles.forEach((file) => formData.append("images", file));
-        await ProductImage(formData);
-        console.log("Creating images:", formData);
+      for (const v of variantList) {
+        await ProductVariantCreateToNaver(productId, v);
       }
 
-      for (const v of variantList) {
-        await ProductVariantCreate(productId, v);
+      const formData = new FormData();
+
+      if (imageFiles.length > 0) {
+        imageFiles.forEach((file) => formData.append("images", file));
       }
 
       if (uploadToNaver) {
-        console.log("Uploading to Naver:", productId);
-        // await ProductUploadToNaver(productId);
+        if (imageFiles.length > 0) {
+          // 이미지 업로드 후 URL 받기
+          const responseImageDto = await ProductImageUploadToNaver(formData);
+          await ProductUploadToNaver(productId, responseImageDto);
+        } else {
+          alert("네이버 업로드를 위해 이미지를 선택해주세요.");
+          return;
+        }
       }
+
+      if (imageFiles.length > 0) {
+        formData.append("productId", String(productId));
+        await ProductImage(formData);
+      }
+
       alert("상품이 성공적으로 등록되었습니다!");
     } catch (err) {
       console.error(err);
@@ -86,10 +123,13 @@ const AdminNewProductPage = () => {
       />
 
       <ProductVariantForm
-        selectedSizes={selectedSizes}
-        setSelectedSizes={setSelectedSizes}
-        selectedColors={selectedColors}
-        setSelectedColors={setSelectedColors}
+        variantOptions={variantOptions}
+        optionValues={optionValues}
+        setOptionValues={setOptionValues}
+        optionMeta={optionMeta}
+        setOptionMeta={setOptionMeta}
+        selectedValues={selectedValues}
+        setSelectedValues={setSelectedValues}
         variantList={variantList}
         setVariantList={setVariantList}
       />

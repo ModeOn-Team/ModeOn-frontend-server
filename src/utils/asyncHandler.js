@@ -2,7 +2,8 @@ export const asyncHandler = async (set, callback) => {
   set({ loading: true, error: null });
 
   try {
-    await callback();
+    const result = await callback();  
+    return result;                   
   } catch (err) {
     set({
       error: err.message || "Request failed",
