@@ -14,6 +14,8 @@ const ProductDetailSide = ({
 }) => {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [isWish, setIsWish] = useState(wishList);
+  const [showCartModal, setShowCartModal] = useState(false); 
+
   const navigate = useNavigate();
 
   const handleSelect = (e) => {
@@ -69,10 +71,10 @@ const ProductDetailSide = ({
           size: option.size,
           color: option.color,
         });
+        setShowCartModal(true);
         
       }
-      alert("장바구니에 담겼습니다!");
-      navigate("/mypage?tab=cart"); 
+
     } catch (err) {
       console.error(err);
       alert("장바구니 담기 실패!");
@@ -199,6 +201,29 @@ const ProductDetailSide = ({
 </button>
 
       </div>
+      {showCartModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl p-10 shadow-xl w-[420px] text-center space-y-8">
+      <p className="text-xl font-semibold">장바구니에 담겼습니다!</p>
+
+      <div className="flex gap-4">
+        <button
+          className="flex-1 py-3 rounded-xl border border-gray-300 hover:bg-gray-100 transition"
+          onClick={() => navigate("/")}
+        >
+          계속 쇼핑하기
+        </button>
+
+        <button
+          className="flex-1 py-3 rounded-xl bg-black text-white hover:bg-gray-800 transition"
+          onClick={() => navigate("/mypage?tab=cart")}
+        >
+          장바구니로 이동
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       <div className="text-sm mt-3">
         <p className="font-medium">🚚 ModeOn 회원은 전 품목 무료 배송</p>

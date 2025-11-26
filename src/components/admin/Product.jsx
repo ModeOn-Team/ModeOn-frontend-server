@@ -4,9 +4,16 @@ import ProductList from "./ProductList";
 import ProductSearch from "./ProductSearch";
 import useProductStore from "../../store/ProductStore";
 
-const Product = () => {
+const Product = ({ setActiveTab }) => {
   const { ProductDelete } = useAdminStore();
-  const { categories, products, fetchCategories, fetchProducts, page, totalPages } = useProductStore();
+  const {
+    categories,
+    products,
+    fetchCategories,
+    fetchProducts,
+    page,
+    totalPages,
+  } = useProductStore();
 
   useEffect(() => {
     fetchProducts(0, false);
@@ -22,11 +29,22 @@ const Product = () => {
       <h2 className="text-2xl font-bold mb-4">Product Management</h2>
 
       <ProductSearch categories={categories} />
-      
+
+      <div className="flex justify-end">
+        <button
+          onClick={() =>
+            setActiveTab("product new")
+          }
+          className="bg-black hover:bg-red-400 text-white px-4 py-2 rounded"
+        >
+          Add Product
+        </button>
+      </div>
+
       <ProductList
         products={products}
         ProductDelete={ProductDelete}
-        onRefresh={() => fetchProducts(page, false)} 
+        onRefresh={() => fetchProducts(page, false)}
       />
 
       {totalPages > 1 && (

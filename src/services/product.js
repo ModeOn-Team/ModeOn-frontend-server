@@ -19,15 +19,8 @@ export const ProductService = {
   },
 
   async ProductSearch(ProductSearchForm) {
-    const {
-      gender,
-      categoryName,
-      size,
-      color,
-      word,
-      page,
-      pageSize,
-    } = ProductSearchForm;
+    const { gender, categoryName, size, color, word, page, pageSize } =
+      ProductSearchForm;
 
     const query = new URLSearchParams();
     if (gender) query.append("gender", gender);
@@ -39,6 +32,35 @@ export const ProductService = {
     if (pageSize !== undefined) query.append("pageSize", pageSize);
 
     const response = await api.get(`/api/product/search?${query.toString()}`);
+    return response.data;
+  },
+
+  ProductUploadToNaver: async (productId, responseImageUrl) => {
+    const response = await api.post(
+      `/api/product/upload-naver/${productId}`,
+      responseImageUrl
+    );
+    return response.data;
+  },
+
+  ProductImageUploadToNaver: async (ProductFormData) => {
+    const response = await api.post(
+      `/api/product/image/upload-naver/`,
+      ProductFormData,
+      {
+        headers: {
+          "Content-Type": undefined,
+        },
+      }
+    );
+    return response.data;
+  },
+
+  ProductVariantFetch: async (categoryId) => {
+    const response = await api.get(
+      `/api/product/variant/load-naver/${categoryId}`,
+    );
+    console.log("ProductVariantFetch response:", response);
     return response.data;
   },
 };
