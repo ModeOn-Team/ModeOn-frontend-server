@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import { ProductService } from "../services/product";
+import { asyncHandler } from "../utils/asyncHandler";
 
 const useProductStore = create((set) => ({
   selectedProduct: null,
   search: [],
   products: [],
   categories: [],
+  variants: [],
   totalPages: 0,
   loading: false,
   last: false,
@@ -83,6 +85,30 @@ const useProductStore = create((set) => ({
       throw err;
     }
   },
+
+  ProductUploadToNaver: async (productId, responseImageUrl) =>
+    asyncHandler(set, async () => {
+      const ProductUpload = await ProductService.ProductUploadToNaver(
+        productId,
+        responseImageUrl
+      );
+    }),
+
+  ProductImageUploadToNaver: async (ProductFormData) =>
+    asyncHandler(set, async () => {
+      const uploadImages = await ProductService.ProductImageUploadToNaver(
+        ProductFormData
+      );
+      return uploadImages;
+    }),
+
+  ProductVariantFetch: async (categoryId) =>
+    asyncHandler(set, async () => {
+      const response = await ProductService.ProductVariantFetch(
+        categoryId
+      );
+      return response;
+    }),
 }));
 
 export default useProductStore;

@@ -38,6 +38,14 @@ export const AdminService = {
     return response.data;
   },
 
+  async ProductVariantCreateToNaver(productId, ProductVariantFormData) {
+    const response = await api.post(
+      `/api/product/variant/${productId}/naver`,
+      ProductVariantFormData
+    );
+    return response.data;
+  },
+
   async ProductVariantUpdate(ProductVariantId, ProductVariantFormData) {
     const response = await api.put(
       ADMIN_API_URL + `/products/variants/${ProductVariantId}`,
@@ -54,4 +62,5 @@ export const AdminService = {
     });
     return response.data;
   },
+
 };
