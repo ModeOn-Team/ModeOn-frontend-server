@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { cartService } from "../services/cartService";
-import { loadTossPayments } from "@tosspayments/payment-sdk";
+
 
 function CartPage() {
   const [cartItems, setCartItems] = useState([]);
