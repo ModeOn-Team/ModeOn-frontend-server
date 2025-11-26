@@ -1,24 +1,11 @@
 import api from "./api";
 
-const API_URL = import.meta.env.VITE_API_URL;
-const ADMIN_API = import.meta.env.VITE_ADMIN_API_URL;
-
 export const MembershipService = {
-  // getUserMembership: async () => {
-  //   const response = await api.get(`/api/membership/`);
-  //   return response.data;
-  // },
-
   async getUserMembership() {
     try {
       const response = await api.get("/api/membership");
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`멤버십 로드 실패: ${response.status} ${errorText}`);
-      }
-
-      const data = await response.json();
+      const data = response.data;
 
       return {
         level: data.level || "WELCOME",

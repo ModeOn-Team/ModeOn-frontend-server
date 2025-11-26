@@ -11,7 +11,7 @@ function MembershipDetailPage() {
   const [error, setError] = useState(null);
 
   // 미리보기 모드 감지
-  const previewLevel = searchParams.get("preview"); // ?preview=VIP
+  const previewLevel = searchParams.get("preview");
   const isPreview = !!previewLevel;
 
   // API 호출
@@ -45,7 +45,6 @@ function MembershipDetailPage() {
     );
   }
 
-  // 에러 상태
   if (error) {
     return (
       <MainLayout>
@@ -63,7 +62,6 @@ function MembershipDetailPage() {
     );
   }
 
-  // 데이터 없음
   if (!userInfo) {
     return (
       <MainLayout>
@@ -74,15 +72,27 @@ function MembershipDetailPage() {
     );
   }
 
-  // === 안전하게 데이터 추출 ===
-  const username = userInfo.username || "사용자";
-  const membership = userInfo.membership || "WELCOME";
-  const point = userInfo.point ?? 0;
-  const level = membership;
+  // ==== 등급 계산 로직 (프론트에서 직접 계산) ====
+  const levelRules = [
+    { name: "WELCOME", minAmount: 0 },
+    { name: "SILVER", minAmount: 100000 },
+    { name: "GOLD", minAmount: 300000 },
+    { name: "VIP", minAmount: 500000 },
+    { name: "VVIP", minAmount: 1000000 },
+  ];
 
-  // 표시할 등급 결정
-  const displayLevel = isPreview ? previewLevel : level;
-  const displayUsername = isPreview ? "미리보기" : username;
+  let calculatedLevel = "WELCOME";
+  for (let i = 0; i < levelRules.length; i++) {
+    if (userInfo.totalSpent >= levelRules[i].minAmount) {
+      calculatedLevel = levelRules[i].name;
+    }
+  }
+
+  const effectiveLevel = isPreview ? previewLevel : calculatedLevel;
+
+  // 안전한 데이터 처리
+  const username = userInfo.username || "사용자";
+  const point = userInfo.point ?? 0;
 
   // 등급 색상
   const levelColors = {
@@ -93,13 +103,12 @@ function MembershipDetailPage() {
     VVIP: "#ec4899",
   };
 
-  // 위젯 데이터
   const widgets = [
     {
       label: "현재 등급",
-      value: level,
-      color: levelColors[level] || "#4a90e2",
-      onClick: () => navigate("/mypage/membership"), // 모든 등급 비교 페이지로 이동
+      value: effectiveLevel,
+      color: levelColors[effectiveLevel] || "#4a90e2",
+      onClick: () => navigate("/mypage/membership"),
     },
     {
       label: "포인트",
@@ -124,7 +133,7 @@ function MembershipDetailPage() {
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto py-8 px-4">
-        {/* 뒤로가기 버튼 */}
+        {/* 뒤로가기 */}
         <button
           onClick={() => (isPreview ? navigate(-1) : navigate("/mypage"))}
           className="mb-6 text-gray-600 hover:text-gray-900 font-semibold flex items-center gap-1 transition"
@@ -132,11 +141,10 @@ function MembershipDetailPage() {
           {isPreview ? "뒤로 가기" : "마이페이지로 돌아가기"}
         </button>
 
-        {/* 제목 */}
         <h1 className="text-3xl font-bold mb-8 text-center md:text-left text-gray-800">
           {isPreview
-            ? `${displayLevel} 등급 미리보기`
-            : `${displayUsername} 님의 멤버십 상세`}
+            ? `${effectiveLevel} 등급 미리보기`
+            : `${username} 님의 멤버십 상세`}
         </h1>
 
         {/* 위젯 섹션 */}
@@ -162,41 +170,38 @@ function MembershipDetailPage() {
           </div>
         </section>
 
-        {/* 혜택 상세 섹션 */}
+        {/* 혜택 상세 */}
         <section className="p-6 bg-white border rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            {displayLevel} 등급 혜택 상세
+            {effectiveLevel} 등급 혜택 상세
             {isPreview && (
               <span className="text-sm font-normal text-blue-600">
                 (미리보기)
               </span>
             )}
           </h2>
+
           <ul className="list-disc list-inside space-y-2 ml-4 text-gray-700 text-sm leading-relaxed">
-            {displayLevel === "WELCOME" && (
+            {effectiveLevel === "WELCOME" && (
               <li>가입 축하 쿠폰, 첫 구매 5% 할인 (최초 1회)</li>
             )}
-            {["SILVER", "GOLD", "VIP", "VVIP"].includes(displayLevel) && (
+            {["SILVER", "GOLD", "VIP", "VVIP"].includes(effectiveLevel) && (
               <li>생일 쿠폰 (연 1회 지급)</li>
             )}
-            {["GOLD", "VIP", "VVIP"].includes(displayLevel) && (
+            {["GOLD", "VIP", "VVIP"].includes(effectiveLevel) && (
               <li>전 상품 5% 적립, 무료배송 쿠폰 (월간 지급)</li>
             )}
-            {["VIP", "VVIP"].includes(displayLevel) && (
+            {["VIP", "VVIP"].includes(effectiveLevel) && (
               <li>월 1회 10% 할인 쿠폰</li>
             )}
-            {displayLevel === "VVIP" && (
+            {effectiveLevel === "VVIP" && (
               <li>월 1회 20% 할인 쿠폰 (최고 등급 전용)</li>
             )}
-            {!["WELCOME", "SILVER", "GOLD", "VIP", "VVIP"].includes(
-              displayLevel
-            ) && <li className="text-red-500">존재하지 않는 등급입니다.</li>}
           </ul>
 
-          {/* 현재 등급 문구 */}
           {!isPreview && (
             <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-              <strong>{level}</strong> 등급입니다.{" "}
+              <strong>{effectiveLevel}</strong> 등급입니다.{" "}
               <button
                 onClick={() => navigate("/mypage/membership/levels")}
                 className="underline hover:no-underline font-medium"
@@ -207,7 +212,6 @@ function MembershipDetailPage() {
           )}
         </section>
 
-        {/* 안내 문구 */}
         <div className="mt-10 text-sm text-gray-500 text-center">
           * 등급 기준: 최근 12개월 누적 구매액 기준
           <br />
