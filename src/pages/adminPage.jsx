@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
-import AdminCategory from "../components/admin/AdminCategory";
+import Category from "../components/admin/Category";
+import AdminCategory from "../components/admin/AdminCategory.jsx";
 import Product from "../components/admin/Product";
 import AdminChatListPage from "./AdminChatListPage";
 import Stock from "../components/admin/Stock";
 import Delivery from "../components/admin/Delivery";
-import AdminRequestList from "../components/admin/AdminRequestList";
+import AdminRequestList from "../components/admin/AdminRequestList.jsx";
+import AdminNewProductPage from "./AdminNewProductPage.jsx";
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -43,7 +45,9 @@ const AdminPage = () => {
             <button
               onClick={() => moveTab("product")}
               className={`text-left p-2 rounded ${
-                activeTab === "product" ? "bg-black text-white" : "hover:bg-gray-200"
+                activeTab.includes("product")
+                  ? "bg-black text-white"
+                  : "hover:bg-gray-200"
               }`}
             >
               상품 관리
@@ -89,7 +93,8 @@ const AdminPage = () => {
 
         <main className="flex-1 p-10">
           {activeTab === "category" && <AdminCategory />}
-          {activeTab === "product" && <Product />}
+          {activeTab === "product" && <Product setActiveTab={setActiveTab}/>}
+          {activeTab === "product new" && <AdminNewProductPage />}
           {activeTab === "stock" && <Stock />}
           {activeTab === "chat" && <AdminChatListPage />}
           {activeTab === "delivery" && <Delivery />}

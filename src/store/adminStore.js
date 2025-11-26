@@ -67,6 +67,26 @@ const useAdminStore = create((set) => ({
     }
   },
 
+  ProductVariantCreateToNaver: async (productId, ProductVariantFormData) => {
+    set({ loading: true, error: null });
+    try {
+      const data = await AdminService.ProductVariantCreateToNaver(
+        productId,
+        ProductVariantFormData
+      );
+      set({
+        loading: false,
+      });
+      return data;
+    } catch (err) {
+      set({
+        loading: false,
+        error: err.response?.data?.message || "ProductVariantCreate failed",
+      });
+      throw err;
+    }
+  },
+
   ProductVariantUpdate: async (ProductVariantId, ProductVariantFormData) => {
     set({ loading: true, error: null });
     try {

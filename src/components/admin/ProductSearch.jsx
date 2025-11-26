@@ -5,7 +5,6 @@ const ProductSearch = ({ categories }) => {
   const [selectedDepth0, setSelectedDepth0] = useState(null);
   const [selectedDepth1, setSelectedDepth1] = useState(null);
   const [selectedDepth2, setSelectedDepth2] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const depth0Categories = categories.filter((cat) => cat.depth === 0);
   const depth1Categories = selectedDepth0
@@ -105,22 +104,6 @@ const ProductSearch = ({ categories }) => {
           </button>
         </div>
       </div>
-
-      <div className="flex justify-end">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-black hover:bg-red-400 text-white px-4 py-2 rounded"
-        >
-          Add Product
-        </button>
-      </div>
-
-      <ProductForm
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        categoryPath={selectedPath} 
-        categories={categories}
-      />
     </div>
   );
 };
