@@ -45,7 +45,7 @@ export const ProductService = {
 
   ProductImageUploadToNaver: async (ProductFormData) => {
     const response = await api.post(
-      `/api/product/image/upload-naver/`,
+      `/api/product/image/upload-naver`,
       ProductFormData,
       {
         headers: {
