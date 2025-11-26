@@ -49,8 +49,9 @@ function HistoryPage() {
                 <img
                   onClick={() => navigate(`/orders/${item.id}`)}
                   src={
-                    API_URL + item.productImage ||
-                    "https://cdn-icons-png.flaticon.com/512/7596/7596292.png"
+                    item.productImage
+                      ? API_URL + item.productImage
+                      : "https://cdn-icons-png.flaticon.com/512/7596/7596292.png"
                   }
                   alt={item.productName}
                   className="w-28 h-28 rounded-lg object-cover border cursor-pointer hover:scale-105 transition"
@@ -137,7 +138,8 @@ function HistoryPage() {
                       </button>
                     )}
 
-                    {statusKey === "DELIVERED" && (
+                    {/*  교환/환불 버튼 조건 수정됨 */}
+                    {statusKey === "DELIVERED" && !item.requestStatus && (
                       <button
                         onClick={() => navigate(`/orders/${item.id}/request`)}
                         className="px-3 py-1.5 rounded-lg border border-red-400 text-red-600 text-sm hover:bg-red-50 transition"

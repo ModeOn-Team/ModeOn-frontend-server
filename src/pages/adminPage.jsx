@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
 import Category from "../components/admin/Category";
-//
 import AdminCategory from "../components/admin/AdminCategory.jsx";
 import Product from "../components/admin/Product";
 import AdminChatListPage from "./AdminChatListPage";
@@ -12,16 +11,21 @@ import AdminRequestList from "../components/admin/AdminRequestList.jsx";
 import AdminNewProductPage from "./AdminNewProductPage.jsx";
 
 const AdminPage = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
   const tabFromUrl = searchParams.get("tab") || "category";
   const [activeTab, setActiveTab] = useState(tabFromUrl);
 
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab) {
-      setActiveTab(tab);
-    }
+    if (tab) setActiveTab(tab);
   }, [searchParams]);
+
+  const moveTab = (tab) => {
+    setActiveTab(tab);
+    navigate(`/modeon-admin1101?tab=${tab}`);
+  };
 
   return (
     <MainLayout>
@@ -30,17 +34,16 @@ const AdminPage = () => {
           <h1 className="text-xl font-bold mb-6">Admin Dashboard</h1>
           <nav className="flex flex-col gap-3">
             <button
-              onClick={() => setActiveTab("category")}
+              onClick={() => moveTab("category")}
               className={`text-left p-2 rounded ${
-                activeTab === "category"
-                  ? "bg-black text-white"
-                  : "hover:bg-gray-200"
+                activeTab === "category" ? "bg-black text-white" : "hover:bg-gray-200"
               }`}
             >
               카테고리 관리
             </button>
+
             <button
-              onClick={() => setActiveTab("product")}
+              onClick={() => moveTab("product")}
               className={`text-left p-2 rounded ${
                 activeTab.includes("product")
                   ? "bg-black text-white"
@@ -49,36 +52,38 @@ const AdminPage = () => {
             >
               상품 관리
             </button>
+
             <button
-              onClick={() => setActiveTab("stock")}
+              onClick={() => moveTab("stock")}
               className={`text-left p-2 rounded ${
-                activeTab === "stock"
-                  ? "bg-black text-white"
-                  : "hover:bg-gray-200"
+                activeTab === "stock" ? "bg-black text-white" : "hover:bg-gray-200"
               }`}
             >
               재고 관리
             </button>
+
             <button
-              onClick={() => setActiveTab("chat")}
-              className={`text-left p-2 rounded ${activeTab === "chat"}`}
+              onClick={() => moveTab("chat")}
+              className={`text-left p-2 rounded ${
+                activeTab === "chat" ? "bg-black text-white" : "hover:bg-gray-200"
+              }`}
             >
               채팅
             </button>
 
             <button
-              onClick={() => setActiveTab("delivery")}
-              className={`text-left p-2 rounded ${activeTab === "delivery"}`}
+              onClick={() => moveTab("delivery")}
+              className={`text-left p-2 rounded ${
+                activeTab === "delivery" ? "bg-black text-white" : "hover:bg-gray-200"
+              }`}
             >
               배송 관리
             </button>
 
             <button
-              onClick={() => setActiveTab("requests")}
+              onClick={() => moveTab("requests")}
               className={`text-left p-2 rounded ${
-                activeTab === "requests"
-                  ? "bg-black text-white"
-                  : "hover:bg-gray-200"
+                activeTab === "requests" ? "bg-black text-white" : "hover:bg-gray-200"
               }`}
             >
               교환/환불 요청 관리

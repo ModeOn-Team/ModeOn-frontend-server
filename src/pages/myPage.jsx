@@ -6,6 +6,8 @@ import CartPage from "./CartPage";
 import Wishlist from "../components/mypage/Wishlist";
 import HistoryPage from "./HistoryPage";
 import ChatListPage from "./ChatListPage";
+import ReturnPage from "./ReturnPage";
+
 // import Reviews from "../components/mypage/Reviews";
 
 const MyPage = () => {
@@ -22,6 +24,7 @@ const MyPage = () => {
     { id: "cart", label: "장바구니" },
     { id: "wishlist", label: "찜 목록" },
     { id: "orders", label: "주문내역" },
+    { id: "returns", label: "취소/반품 내역" }, 
     { id: "chat", label: "1:1 문의" },
     // { id: "membership", label: "멤버십 등급" },
     // { id: "points", label: "누적 포인트" },
@@ -71,6 +74,8 @@ const MyPage = () => {
           {activeTab === "wishlist" && <Wishlist />}
           {activeTab === "orders" && <HistoryPage />}
           {activeTab === "ordersDetail" && <HistoryDetailPage />}
+          {activeTab === "returns" && <ReturnPage />}
+
           {activeTab === "chat" && <ChatListPage />}
           {/* {activeTab === "reviews" && <Reviews />} */}
         </main>
